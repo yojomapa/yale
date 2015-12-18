@@ -8,9 +8,9 @@ import (
 	"strconv"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/ch3lo/yale/helper"
-	"github.com/ch3lo/yale/monitor"
-	"github.com/ch3lo/yale/util"
+	"github.com/yojomapa/yale/helper"
+	"github.com/yojomapa/yale/monitor"
+	"github.com/yojomapa/yale/util"
 	"github.com/fsouza/go-dockerclient"
 )
 

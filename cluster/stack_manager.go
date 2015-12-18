@@ -1,10 +1,10 @@
 package cluster
 
 import (
-	"github.com/ch3lo/yale/helper"
-	"github.com/ch3lo/yale/monitor"
-	"github.com/ch3lo/yale/service"
-	"github.com/ch3lo/yale/util"
+	"github.com/yojomapa/yale/helper"
+	"github.com/yojomapa/yale/monitor"
+	"github.com/yojomapa/yale/service"
+	"github.com/yojomapa/yale/util"
 )
 
 type StackManager struct {

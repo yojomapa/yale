@@ -4,7 +4,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/ch3lo/yale/util"
+	"github.com/yojomapa/yale/util"
 	"github.com/codegangsta/cli"
 	"github.com/olekukonko/tablewriter"
 )

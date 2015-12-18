@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/ch3lo/yale/util"
+	"github.com/yojomapa/yale/util"
 	"github.com/fsouza/go-dockerclient"
 )
 

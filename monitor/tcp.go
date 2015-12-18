@@ -5,7 +5,7 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/ch3lo/yale/util"
+	"github.com/yojomapa/yale/util"
 )
 
 type TcpMonitor struct {
