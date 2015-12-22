@@ -80,6 +80,27 @@ func (s *ServiceConfig) String() string {
 	return fmt.Sprintf("ImageName: %s - Tag: %s - CpuShares: %d - Memory: %s - Publish: %#v - Envs: %s", s.ImageName, s.Tag, s.CpuShares, s.Memory, s.Publish, util.MaskEnv(s.Envs))
 }
 
+
+// Generic Service Interface for all frameworks
+type Service interface {
+	GetId() string
+	RegistratorId() string
+	SetStep(step Step)
+	GetStep() string
+	SetState(status State)
+	CheckState(state State) bool
+	Run(serviceConfig ServiceConfig)
+	Undeploy()
+	ContainerName() string
+	ContainerImageName() string
+	ContainerState() string
+	Loaded() bool
+	PublicPorts() map[int64]int64
+	AddressAndPort(internalPort int64) (string, error)
+	RunSmokeTest(monitor monitor.Monitor)
+	RunWarmUp(monitor monitor.Monitor)
+}
+
 type DockerService struct {
 	id              string
 	loaded          bool
@@ -127,7 +148,7 @@ func (ds *DockerService) RegistratorId() string {
 func (ds *DockerService) dockerCli() *helper.DockerHelper {
 	dh := ds.dockerApihelper
 	if dh == nil {
-		ds.setStep(STEP_FAILED)
+		ds.SetStep(STEP_FAILED)
 		return nil
 	}
 
@@ -149,7 +170,7 @@ func (ds *DockerService) bindPort(publish []string) map[docker.Port][]docker.Por
 	return portBindings
 }
 
-func (ds *DockerService) setStep(status Step) {
+func (ds *DockerService) SetStep(status Step) {
 	ds.step = status
 	ds.statusChannel <- ds.id
 }
@@ -227,14 +248,14 @@ func (ds *DockerService) Run(serviceConfig ServiceConfig) {
 
 	if err != nil {
 		ds.log.Errorf("Se produjo un error al arrancar el contenedor: %s", err)
-		ds.setStep(STEP_FAILED)
+		ds.SetStep(STEP_FAILED)
 		return
 	}
 
 	ds.log.Debugln("El contenedor arrancó exitosamente")
 	ds.log.Debugf("El contenedor esta asociado al ID de Registrator %s", ds.RegistratorId())
 
-	ds.setStep(STEP_CREATED)
+	ds.SetStep(STEP_CREATED)
 }
 
 func (ds *DockerService) Undeploy() {
@@ -316,7 +337,7 @@ func (ds *DockerService) RunSmokeTest(monitor monitor.Monitor) {
 	// TODO check a puertos que no sean 8080
 	addr, err = ds.AddressAndPort(8080)
 	if err != nil {
-		ds.setStep(STEP_FAILED)
+		ds.SetStep(STEP_FAILED)
 		return
 	}
 
@@ -325,16 +346,16 @@ func (ds *DockerService) RunSmokeTest(monitor monitor.Monitor) {
 	ds.log.Infof("Se terminó el Smoke Test con estado %t", result)
 
 	if result {
-		ds.setStep(STEP_SMOKE_READY)
+		ds.SetStep(STEP_SMOKE_READY)
 	} else {
-		ds.setStep(STEP_FAILED)
+		ds.SetStep(STEP_FAILED)
 	}
 }
 
 func (ds *DockerService) RunWarmUp(monitor monitor.Monitor) {
 	if !monitor.Configured() {
 		ds.log.Infoln("El servicio no tiene configurado Warm UP. Se saltará esta validación")
-		ds.setStep(STEP_WARM_READY)
+		ds.SetStep(STEP_WARM_READY)
 		return
 	}
 
@@ -344,7 +365,7 @@ func (ds *DockerService) RunWarmUp(monitor monitor.Monitor) {
 	// TODO check a puertos que no sean 8080
 	addr, err = ds.AddressAndPort(8080)
 	if err != nil {
-		ds.setStep(STEP_FAILED)
+		ds.SetStep(STEP_FAILED)
 		return
 	}
 
@@ -353,8 +374,8 @@ func (ds *DockerService) RunWarmUp(monitor monitor.Monitor) {
 	ds.log.Infof("Se terminó el Warm UP con estado %t", result)
 
 	if result {
-		ds.setStep(STEP_WARM_READY)
+		ds.SetStep(STEP_WARM_READY)
 	} else {
-		ds.setStep(STEP_FAILED)
+		ds.SetStep(STEP_FAILED)
 	}
 }
