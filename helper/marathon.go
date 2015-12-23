@@ -16,6 +16,7 @@ func NewMarathonHelper(endpointUrl string) (*MarathonHelper, error) {
 	helper := new(MarathonHelper)
 	helper.endpointUrl = endpointUrl
 	config := marathon.NewDefaultConfig()
+	config.URL = endpointUrl
 	client, err := marathon.NewClient(config)
 	
 	if err != nil {
