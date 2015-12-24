@@ -14,6 +14,7 @@ type ServiceConfig struct {
 	Memory    int64
 	Publish   []string
 	Tag       string
+	Instances int
 }
 
 func (s *ServiceConfig) Version() string {

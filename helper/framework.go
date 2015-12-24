@@ -7,7 +7,7 @@ type FrameworkHelper interface {
 	ListServices() []string
 	DeployService(config model.ServiceConfig)
 	ScaleService(id string, instances int)
-	DeleteService(id string)
+	DeleteService(id string) // Debe eliminar todas las intancias del servicio?? 
 	
 }
 

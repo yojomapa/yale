@@ -20,7 +20,7 @@ func NewMarathonHelper(endpointUrl string) (*MarathonHelper, error) {
 	client, err := marathon.NewClient(config)
 	
 	if err != nil {
-	    fmt.Println("Failed to create a client for marathon, error: %s", err)
+	   util.Log.Fatalf("Failed to create a client for marathon, error: %s", err)
 		return nil, err
 	}
 	
@@ -53,39 +53,63 @@ func (helper *MarathonHelper) DeployService(config model.ServiceConfig) {
 }
 
 func (helper *MarathonHelper) ScaleService(id string, instances int) {
-	
+	if _, err := helper.client.ScaleApplicationInstances(id, instances, true); err != nil {
+    	util.Log.Fatalf("Failed to Scale the application: %s, error: %s", id, err)
+	}
 }
 
 func (helper *MarathonHelper) DeleteService(id string) {
-	
+	if _, err := helper.client.DeleteApplication(id); err != nil {
+		util.Log.Fatalf("Failed to Delete the application: %s, error: %s", id, err)
+	}
 }
 
 func translateServiceConfig(config model.ServiceConfig) *marathon.Application {
 	application := marathon.NewDockerApplication()
+	imageWithTag := config.ImageName + ":" + config.Tag
+	labels := map[string]string{
+		"image_name": config.ImageName,
+		"image_tag":  config.Tag,
+	}
 	
-	application.Name("/product/name/frontend")
-	application.CPU(0.1).Memory(64).Storage(0.0).Count(2)
-	application.Arg("/usr/sbin/apache2ctl", "-D", "FOREGROUND")
-	application.AddEnv("NAME", "frontend_http")
-	application.AddEnv("SERVICE_80_NAME", "test_http")
-	application.AddLabel("environment", "staging")
-	application.AddLabel("security", "none")
+	application.ID = config.ServiceId
+	application.Name(imageWithTag)
+	application.CPU(0.1) // how to map this ?
+	application.Memory(float64(config.Memory))
+	application.Count(config.Instances)
+	//application.Arg("/usr/sbin/apache2ctl", "-D", "FOREGROUND")
+	application.Env = util.StringSlice2Map(config.Envs)
+	application.Labels = labels
 	// add the docker container
-	application.Container.Docker.Container("quay.io/gambol99/apache-php:latest").Expose(80, 443)
-	application.CheckHTTP("/health", 10, 5)
-	
+	application.Container.Docker.Container(imageWithTag)
+	//application.Container.Docker.Expose(80, 443)
+	application.Container.Docker.PortMappings = createPorMappings(config.Publish) // Hard to map!!
+	//application.CheckHTTP("/health", 10, 5)
 	return application
 }
 
-func RunMarathon() {
-	marathonURL := "http://localhost:8081"
-	config := marathon.NewDefaultConfig()
-	config.URL = marathonURL
-	client, err := marathon.NewClient(config)
-	if err != nil {
-	    fmt.Println("Failed to create a client for marathon, error: %s", err)
+func createPorMappings(ports []string) []*marathon.PortMapping {
+	
+	for _, val := range ports {
+		fmt.Println(val)
+		
+//		var portMap marathon.PortMamarathon.PortMapping
+//		portMap
+		
 	}
 	
-	applications, _ := client.Applications(nil)
-	fmt.Println(applications.Apps)
+	return nil
 }
+
+//func RunMarathon() {
+//	marathonURL := "http://localhost:8081"
+//	config := marathon.NewDefaultConfig()
+//	config.URL = marathonURL
+//	client, err := marathon.NewClient(config)
+//	if err != nil {
+//	    fmt.Println("Failed to create a client for marathon, error: %s", err)
+//	}
+	
+//	applications, _ := client.Applications(nil)
+//	fmt.Println(applications.Apps)
+//}
