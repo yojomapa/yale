@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/ch3lo/yale",
+	"ImportPath": "github.com/jglobant/yale",
 	"GoVersion": "go1.4.2",
 	"Deps": [
 		{
@@ -28,6 +28,11 @@
 		},
 		{
 			"ImportPath": "github.com/docker/docker/pkg/ioutils",
+			"Comment": "v1.4.1-7144-g448398c",
+			"Rev": "448398c2a8a41b6589dd7deb59fdc889e78db223"
+		},
+		{
+			"ImportPath": "github.com/docker/docker/pkg/longpath",
 			"Comment": "v1.4.1-7144-g448398c",
 			"Rev": "448398c2a8a41b6589dd7deb59fdc889e78db223"
 		},
@@ -67,8 +72,20 @@
 			"Rev": "448398c2a8a41b6589dd7deb59fdc889e78db223"
 		},
 		{
+			"ImportPath": "github.com/donovanhide/eventsource",
+			"Rev": "d8a3071799b98cacd30b6da92f536050ccfe6da4"
+		},
+		{
 			"ImportPath": "github.com/fsouza/go-dockerclient",
 			"Rev": "0c270fe398313b06afc3c27124de62c2d6af57b4"
+		},
+		{
+			"ImportPath": "github.com/gambol99/go-marathon",
+			"Rev": "95fb51a398d44ccd0e73e420c26d73df952ae5dc"
+		},
+		{
+			"ImportPath": "github.com/google/go-querystring/query",
+			"Rev": "2a60fc2ba6c19de80291203597d752e9ba58e4c0"
 		},
 		{
 			"ImportPath": "github.com/olekukonko/tablewriter",
