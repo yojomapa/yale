@@ -3,7 +3,7 @@ package model
 import (
 	"fmt"
 	"regexp"
-	"github.com/yojomapa/yale/util"
+	"github.com/jglobant/yale/util"
 )
 
 type ServiceConfig struct {

@@ -2,8 +2,8 @@ package helper
 
 import (
 	"fmt"
-	"github.com/yojomapa/yale/model"
-	"github.com/yojomapa/yale/util"
+	"github.com/jglobant/yale/model"
+	"github.com/jglobant/yale/util"
 	"github.com/gambol99/go-marathon"
 )
 

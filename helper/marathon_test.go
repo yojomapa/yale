@@ -3,7 +3,7 @@ package helper
 import (
 	"testing"
 	"fmt"
-	"github.com/yojomapa/yale/model"
+	"github.com/jglobant/yale/model"
 	)
 
 func TestListServices(t *testing.T) {

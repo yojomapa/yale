@@ -8,10 +8,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/yojomapa/yale/cluster"
-	"github.com/yojomapa/yale/monitor"
-	"github.com/yojomapa/yale/service"
-	"github.com/yojomapa/yale/util"
+	"github.com/jglobant/yale/cluster"
+	"github.com/jglobant/yale/monitor"
+	"github.com/jglobant/yale/service"
+	"github.com/jglobant/yale/util"
 	"github.com/codegangsta/cli"
 	"github.com/pivotal-golang/bytefmt"
 )

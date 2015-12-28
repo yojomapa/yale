@@ -1,6 +1,6 @@
 package helper
 
-import "github.com/yojomapa/yale/model"
+import "github.com/jglobant/yale/model"
 
 // The Framework Helper interface that all future framework implementations should fulfill
 type FrameworkHelper interface {

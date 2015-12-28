@@ -7,10 +7,10 @@ import (
 	"path"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/yojomapa/yale/cluster"
-	"github.com/yojomapa/yale/helper"
-	"github.com/yojomapa/yale/util"
-	"github.com/yojomapa/yale/version"
+	"github.com/jglobant/yale/cluster"
+	"github.com/jglobant/yale/helper"
+	"github.com/jglobant/yale/util"
+	"github.com/jglobant/yale/version"
 	"github.com/codegangsta/cli"
 )
 

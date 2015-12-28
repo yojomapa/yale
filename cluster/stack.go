@@ -3,10 +3,10 @@ package cluster
 import (
 	"github.com/Pallinder/go-randomdata"
 	log "github.com/Sirupsen/logrus"
-	"github.com/yojomapa/yale/helper"
-	"github.com/yojomapa/yale/monitor"
-	"github.com/yojomapa/yale/service"
-	"github.com/yojomapa/yale/util"
+	"github.com/jglobant/yale/helper"
+	"github.com/jglobant/yale/monitor"
+	"github.com/jglobant/yale/service"
+	"github.com/jglobant/yale/util"
 )
 
 type StackStatus int
