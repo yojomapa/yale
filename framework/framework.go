@@ -1,4 +1,4 @@
-package helper
+package framework
 
 import "github.com/jglobant/yale/model"
 
