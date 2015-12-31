@@ -20,7 +20,6 @@ func NewMarathonHelper(endpointUrl string) (*MarathonHelper, error) {
 	client, err := marathon.NewClient(config)
 	
 	if err != nil {
-	   util.Log.Fatalf("Failed to create a client for marathon, error: %s", err)
 		return nil, err
 	}
 	
@@ -40,28 +39,26 @@ func (helper *MarathonHelper) ListServices() []string {
 	return appList
 }
 
-func (helper *MarathonHelper) DeployService(config model.ServiceConfig) {
-	
+func (helper *MarathonHelper) DeployService(config model.ServiceConfig) (error) {
 	application := translateServiceConfig(config)
-	
-	if _, err := helper.client.CreateApplication(application); err != nil {
-    	util.Log.Fatalf("Failed to create application: %s, error: %s", application, err)
-	} else {
-    	util.Log.Printf("Created the application: %s", application)
-	}
-	
+	_, err := helper.client.CreateApplication(application)
+	return err
 }
 
-func (helper *MarathonHelper) ScaleService(id string, instances int) {
-	if _, err := helper.client.ScaleApplicationInstances(id, instances, true); err != nil {
-    	util.Log.Fatalf("Failed to Scale the application: %s, error: %s", id, err)
+func (helper *MarathonHelper) ScaleService(id string, instances int) (error){
+	_, err := helper.client.ScaleApplicationInstances(id, instances, true)
+	if err != nil {
+    		util.Log.Errorf("Failed to Scale the application: %s, error: %s", id, err)
 	}
+	return err
 }
 
-func (helper *MarathonHelper) DeleteService(id string) {
-	if _, err := helper.client.DeleteApplication(id); err != nil {
-		util.Log.Fatalf("Failed to Delete the application: %s, error: %s", id, err)
+func (helper *MarathonHelper) DeleteService(id string) (error) {
+	_, err := helper.client.DeleteApplication(id)
+	if err != nil {
+		util.Log.Errorf("Failed to Delete the application: %s, error: %s", id, err)
 	}
+	return err
 }
 
 func translateServiceConfig(config model.ServiceConfig) *marathon.Application {
@@ -100,16 +97,3 @@ func createPorMappings(ports []string) []*marathon.PortMapping {
 	
 	return nil
 }
-
-//func RunMarathon() {
-//	marathonURL := "http://localhost:8081"
-//	config := marathon.NewDefaultConfig()
-//	config.URL = marathonURL
-//	client, err := marathon.NewClient(config)
-//	if err != nil {
-//	    fmt.Println("Failed to create a client for marathon, error: %s", err)
-//	}
-	
-//	applications, _ := client.Applications(nil)
-//	fmt.Println(applications.Apps)
-//}
