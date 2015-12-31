@@ -23,5 +23,6 @@ func TestTranslateApp(t *testing.T) {
         }
         app = translator.TranslateServiceConfig(cfg)
         assert.Equal(t, 2, len(app.Container.Docker.PortMappings), "App should not have 2 ports")
-
+	assert.Equal(t, 80, app.Container.Docker.PortMappings[0].ContainerPort, "Port should be 80")
+	assert.Equal(t, 443, app.Container.Docker.PortMappings[1].ContainerPort, "Port should be 443")
 }
