@@ -7,11 +7,7 @@ import (
 )
 
 func TestCreateFramework(t *testing.T) {
-	
-	fmt.Println("TestCreateFramework Starting")
-
 	helper, error := NewFrameworkHelper("http://localhost:8081")
-	
 	if error != nil {
 		t.Errorf("Error: " + error.Error())
 	}
