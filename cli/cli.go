@@ -8,7 +8,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/jglobant/yale/cluster"
-	"github.com/jglobant/yale/helper"
+	"github.com/jglobant/yale/framework"
 	"github.com/jglobant/yale/util"
 	"github.com/jglobant/yale/version"
 	"github.com/codegangsta/cli"
@@ -180,25 +180,25 @@ func setupGlobalFlags(c *cli.Context) error {
 
 	for _, ep := range c.StringSlice("endpoint") {
 		util.Log.Infof("Configurando el endpoint de Docker %s", ep)
-		var dh *helper.DockerHelper
+		var fh framework.FrameworkHelper
 		if c.Bool("tlsverify") {
 			ca := buildCertPath(c.String("cert_path"), c.String("tlscacert"))
 			cert := buildCertPath(c.String("cert_path"), c.String("tlscert"))
 			key := buildCertPath(c.String("cert_path"), c.String("tlskey"))
-			dh, err = helper.NewDockerTlsVerifyHelper(ep, c.String("auth-file"), cert, key, ca)
+			fh, err = framework.NewFrameworkTlsVerifyHelper(ep, cert, key, ca)
 		} else if c.Bool("tls") {
 			cert := buildCertPath(c.String("cert_path"), c.String("tlscert"))
 			key := buildCertPath(c.String("cert_path"), c.String("tlskey"))
-			dh, err = helper.NewDockerTlsHelper(ep, c.String("auth-file"), cert, key)
+			fh, err = framework.NewFrameworkTlsHelper(ep, cert, key)
 		} else {
-			dh, err = helper.NewDockerHelper(ep, c.String("auth-file"))
+			fh, err = framework.NewFrameworkHelper(ep)
 		}
 
 		if err != nil {
-			fmt.Println("No se pudo configurar el endpoint de Docker")
+			fmt.Println("No se pudo configurar el endpoint del Framework")
 			return err
 		}
-		stackManager.AppendStack(dh)
+		stackManager.AppendStack(&fh)
 	}
 
 	return nil

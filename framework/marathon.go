@@ -1,6 +1,7 @@
 package framework 
 
 import (
+	"errors"
 	"github.com/jglobant/yale/model"
 	"github.com/jglobant/yale/util"
 	"github.com/gambol99/go-marathon"
@@ -24,6 +25,14 @@ func NewMarathonHelper(endpointUrl string) (*MarathonHelper, error) {
 	
 	helper.client = client
 	return helper, nil
+}
+
+func NewMarathonTlsHelper(endpointUrl, cert,  key string) (*MarathonHelper, error) {
+	return nil, errors.New("Not implemented yet")
+}
+
+func NewMarathonTlsVerifyHelper(endpointUrl, cert,  key, ca string) (*MarathonHelper, error) {
+	return nil, errors.New("Not implemented yet")
 }
 
 func (helper *MarathonHelper) ListServices() []string {

@@ -4,6 +4,7 @@ import (
 	"github.com/Pallinder/go-randomdata"
 	log "github.com/Sirupsen/logrus"
 	"github.com/jglobant/yale/helper"
+	"github.com/jglobant/yale/framework"
 	"github.com/jglobant/yale/monitor"
 	"github.com/jglobant/yale/service"
 	"github.com/jglobant/yale/util"
@@ -27,7 +28,7 @@ func (s StackStatus) String() string {
 
 type Stack struct {
 	id                    string
-	dockerApiHelper       *helper.DockerHelper
+	frameworkApiHelper       *framework.FrameworkHelper
 	services              []*service.DockerService // refactorizar a interfaz service
 	serviceIdNotification chan string
 	stackNofitication     chan<- StackStatus
@@ -36,11 +37,11 @@ type Stack struct {
 	log                   *log.Entry
 }
 
-func NewStack(stackKey string, stackNofitication chan<- StackStatus, dh *helper.DockerHelper) *Stack {
+func NewStack(stackKey string, stackNofitication chan<- StackStatus, fh *framework.FrameworkHelper) *Stack {
 	s := new(Stack)
 	s.id = stackKey
 	s.stackNofitication = stackNofitication
-	s.dockerApiHelper = dh
+	s.frameworkApiHelper = fh
 	s.serviceIdNotification = make(chan string, 1000)
 
 	s.log = util.Log.WithFields(log.Fields{
@@ -124,9 +125,9 @@ func (s *Stack) addNewService(dockerService *service.DockerService) {
 }
 
 func (s *Stack) deployOneInstance(serviceConfig service.ServiceConfig) {
-	dockerService := service.NewDockerService(s.createId(), s.dockerApiHelper, s.serviceIdNotification)
+	/*dockerService := service.NewDockerService(s.createId(), s.frameworkApiHelper, s.serviceIdNotification)
 	s.addNewService(dockerService)
-	dockerService.Run(serviceConfig)
+	dockerService.Run(serviceConfig)*/
 }
 
 func (s *Stack) undeployInstance(serviceId string) {
@@ -249,37 +250,38 @@ func (s *Stack) LoadFilteredContainers(imageNameFilter string, tagFilter string,
 	filter.TagRegexp = tagFilter
 	filter.NameRegexp = containerNameFilter
 
-	containers, err := s.dockerApiHelper.ListContainers(filter)
+/*
+	containers, err := s.frameworkApiHelper.ListContainers(filter)
 	if err != nil {
 		return err
 	}
 
 	for k := range containers {
-		c, err := s.dockerApiHelper.ContainerInspect(containers[k].ID)
+		c, err := s.frameworkApiHelper.ContainerInspect(containers[k].ID)
 		if err != nil {
 			return err
 		}
-		s.services = append(s.services, service.NewFromContainer(s.createId(), s.dockerApiHelper, c, s.serviceIdNotification))
+		s.services = append(s.services, service.NewFromContainer(s.createId(), s.frameworkApiHelper, c, s.serviceIdNotification))
 	}
-
+*/
 	return nil
 }
 
 func (s *Stack) LoadTaggedContainers(imageName string, tag string) error {
 	util.Log.Debugf("Cargando contenedores filtrando por TAG con filtros: imagen %s - tag %s", imageName, tag)
-
-	containers, err := s.dockerApiHelper.ListTaggedContainers(imageName, tag)
+/*
+	containers, err := s.frameworkApiHelper.ListTaggedContainers(imageName, tag)
 	if err != nil {
 		return err
 	}
 
 	for k := range containers {
-		c, err := s.dockerApiHelper.ContainerInspect(containers[k].ID)
+		c, err := s.frameworkApiHelper.ContainerInspect(containers[k].ID)
 		if err != nil {
 			return err
 		}
-		s.services = append(s.services, service.NewFromContainer(s.createId(), s.dockerApiHelper, c, s.serviceIdNotification))
+		s.services = append(s.services, service.NewFromContainer(s.createId(), s.frameworkApiHelper, c, s.serviceIdNotification))
 	}
-
+*/
 	return nil
 }

@@ -1,7 +1,7 @@
 package cluster
 
 import (
-	"github.com/jglobant/yale/helper"
+	"github.com/jglobant/yale/framework"
 	"github.com/jglobant/yale/monitor"
 	"github.com/jglobant/yale/service"
 	"github.com/jglobant/yale/util"
@@ -39,10 +39,10 @@ func (sm *StackManager) createId() string {
 	}
 }
 
-func (sm *StackManager) AppendStack(dh *helper.DockerHelper) {
+func (sm *StackManager) AppendStack(fh *framework.FrameworkHelper) {
 	key := sm.createId()
 	util.Log.Infof("API configurada y mapeada a la llave %s", key)
-	sm.stacks[key] = NewStack(key, sm.stackNotification, dh)
+	sm.stacks[key] = NewStack(key, sm.stackNotification, fh)
 }
 
 func (sm *StackManager) Deploy(serviceConfig service.ServiceConfig, smokeConfig monitor.MonitorConfig, warmConfig monitor.MonitorConfig, instances int, tolerance float64) bool {

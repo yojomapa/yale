@@ -17,11 +17,7 @@ func TestConstructorError(t *testing.T) {
 
 func TestListServices(t *testing.T) {
 	
-	content, _ := ioutil.ReadFile("../test/resources/marathon_tasks_response.json")
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, string(content))
-	}))
+	ts := setup("../test/resources/marathon_tasks_response.json")
 	defer ts.Close()
 
 	helper, error := NewMarathonHelper(ts.URL)
@@ -35,11 +31,7 @@ func TestListServices(t *testing.T) {
 }
 
 func TestDeployService(t *testing.T) {
-	content, _ := ioutil.ReadFile("../test/resources/marathon_new_app_response.json")
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-                w.Header().Set("Content-Type", "application/json")
-                fmt.Fprintln(w, string(content))
-        }))
+	ts := setup("../test/resources/marathon_new_app_response.json")
         defer ts.Close()
 	helper, error := NewMarathonHelper(ts.URL)
 
@@ -48,16 +40,11 @@ func TestDeployService(t *testing.T) {
 	}
 	
 	err := helper.DeployService(model.ServiceConfig{})
-	//assert.Equal(t, "nginx", app.ID, "ID should be nginx")
-	//assert.Equal(t, 1, app.Instances, "App should have 1 instance")
 	assert.True(t, err == nil, "Deploy should work")
 }
 
 func TestErrorDeployService(t *testing.T) {
-        ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-                w.Header().Set("Content-Type", "application/json")
-                fmt.Fprintln(w, "failed response")
-        }))
+	ts := setupFailure()
         defer ts.Close()
         helper, error := NewMarathonHelper(ts.URL)
 
@@ -69,11 +56,7 @@ func TestErrorDeployService(t *testing.T) {
 }
 
 func TestScaleService(t *testing.T) {
-        content, _ := ioutil.ReadFile("../test/resources/marathon_update_instances_response.json")
-        ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-                w.Header().Set("Content-Type", "application/json")
-                fmt.Fprintln(w, string(content))
-        }))
+	ts := setup("../test/resources/marathon_update_instances_response.json")
         defer ts.Close()
         helper, error := NewMarathonHelper(ts.URL)
 
@@ -86,11 +69,8 @@ func TestScaleService(t *testing.T) {
 }
 
 func TestErrorScaleService(t *testing.T) {
-        ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-                w.Header().Set("Content-Type", "application/json")
-                fmt.Fprintln(w, "failed response")
-        }))
-        defer ts.Close()
+        ts := setupFailure()
+	defer ts.Close()
         helper, error := NewMarathonHelper(ts.URL)
 
         if error != nil {
@@ -101,13 +81,9 @@ func TestErrorScaleService(t *testing.T) {
 }
 
 func TestDeleteService(t *testing.T) {
-        content, _ := ioutil.ReadFile("../test/resources/marathon_delete_app_response.json")
-        ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-                w.Header().Set("Content-Type", "application/json")
-                fmt.Fprintln(w, string(content))
-        }))
-        defer ts.Close()
-        helper, error := NewMarathonHelper(ts.URL)
+        ts := setup("../test/resources/marathon_delete_app_response.json")
+	defer ts.Close()
+	helper, error := NewMarathonHelper(ts.URL)
 
         if error != nil {
                 t.Errorf("Error: " + error.Error())
@@ -118,11 +94,8 @@ func TestDeleteService(t *testing.T) {
 }
 
 func TestErrorDeleteService(t *testing.T) {
-        ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-                w.Header().Set("Content-Type", "application/json")
-                fmt.Fprintln(w, "failed response")
-        }))     
-        defer ts.Close()
+	ts := setupFailure()
+	defer ts.Close()
         helper, error := NewMarathonHelper(ts.URL)
         
         if error != nil {
@@ -130,4 +103,21 @@ func TestErrorDeleteService(t *testing.T) {
         }       
         err := helper.DeleteService("error-id")
         assert.True(t, err != nil, "Delete should throw error")
+}
+
+func setupFailure() (*httptest.Server){
+        ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+                w.Header().Set("Content-Type", "application/json")
+                fmt.Fprintln(w, "failed response")
+        }))
+	return ts
+}
+
+func setup(url string) (*httptest.Server) {
+        content, _ := ioutil.ReadFile(url)
+        ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+                w.Header().Set("Content-Type", "application/json")
+                fmt.Fprintln(w, string(content))
+        }))
+	return ts
 }
