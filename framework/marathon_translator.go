@@ -7,11 +7,7 @@ import (
         "strconv"
 )
 
-type MarathonAppTranslator struct {
-}
-
-
-func (translator *MarathonAppTranslator) TranslateServiceConfig(config model.ServiceConfig) *marathon.Application {
+func translateServiceConfig(config model.ServiceConfig) *marathon.Application {
         application := marathon.NewDockerApplication()
         imageWithTag := config.ImageName + ":" + config.Tag
         labels := map[string]string{

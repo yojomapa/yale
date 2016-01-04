@@ -39,8 +39,7 @@ func (helper *MarathonHelper) ListServices() []string {
 }
 
 func (helper *MarathonHelper) DeployService(config model.ServiceConfig) (error) {
-	translator := MarathonAppTranslator{}
-	application := translator.TranslateServiceConfig(config)
+	application := translateServiceConfig(config)
 	_, err := helper.client.CreateApplication(application)
 	return err
 }
