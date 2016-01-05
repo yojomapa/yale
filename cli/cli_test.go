@@ -19,10 +19,7 @@ func TestConstructorError(t *testing.T) {
         }))
         defer ts.Close()
 
-	os.Args[1] = "--endpoint="+ts.URL
-	os.Args = appendItems(os.Args, "list")
-	os.Args = appendItems(os.Args, "--image-filter=nginx")
-	os.Args = appendItems(os.Args, "--tag-filter=latest")
+	os.Args = appendItems(os.Args, "--endpoint="+ts.URL, "list", "--image-filter=nginx", "--tag-filter=latest")
 	//os.Args = appendItems(os.Args, "--smoke-request=/smoke")
 	RunApp()
 	v := reflect.ValueOf(stackManager).Elem()
