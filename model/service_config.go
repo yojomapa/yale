@@ -18,7 +18,7 @@ type ServiceConfig struct {
 	Instances int
 }
 
-func (s *ServiceConfig) Version() (string, error) {
+func (s *ServiceConfig)TagVersion() (string, error) {
 	rp := regexp.MustCompile("^([\\d\\.]+)-")
 	result := rp.FindStringSubmatch(s.Tag)
 	if result == nil {

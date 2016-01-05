@@ -5,22 +5,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestVersionError(t *testing.T) {
+func TestTagVersionError(t *testing.T) {
         cfg := ServiceConfig {
                 Tag: "_bla",
         }
 
-	res, err := cfg.Version()
+	res, err := cfg.TagVersion()
 	assert.Equal(t, "", res, "Version should be empty")
 	assert.NotNil(t, err, "Should throw an error")
 }
 
-func TestVersion(t *testing.T) {
+func TestTagVersion(t *testing.T) {
         cfg := ServiceConfig {
                 Tag: "1.2-Service",
         }
 
-        res, _ := cfg.Version()
+        res, _ := cfg.TagVersion()
         assert.Equal(t, "1.2", res, "Version should be 1.2")
 }
 
