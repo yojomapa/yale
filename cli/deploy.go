@@ -10,7 +10,7 @@ import (
 
 	"github.com/jglobant/yale/cluster"
 	"github.com/jglobant/yale/monitor"
-	"github.com/jglobant/yale/service"
+	"github.com/jglobant/yale/model"
 	"github.com/jglobant/yale/util"
 	"github.com/codegangsta/cli"
 	"github.com/pivotal-golang/bytefmt"
@@ -151,7 +151,7 @@ func deployCmd(c *cli.Context) {
 		envs = append(envs, v)
 	}
 
-	serviceConfig := service.ServiceConfig{
+	serviceConfig := model.ServiceConfig{
 		ServiceId: c.String("service-id"),
 		CpuShares: c.Int("cpu"),
 		Envs:      envs,

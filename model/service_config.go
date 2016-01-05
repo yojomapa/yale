@@ -1,6 +1,7 @@
 package model
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"github.com/jglobant/yale/util"
@@ -17,13 +18,13 @@ type ServiceConfig struct {
 	Instances int
 }
 
-func (s *ServiceConfig) Version() string {
+func (s *ServiceConfig) Version() (string, error) {
 	rp := regexp.MustCompile("^([\\d\\.]+)-")
 	result := rp.FindStringSubmatch(s.Tag)
 	if result == nil {
-		util.Log.Fatalln("Formato de TAG invalido")
+		return "", errors.New("Formato de TAG invalido")
 	}
-	return result[1]
+	return result[1], nil
 }
 
 func (s *ServiceConfig) String() string {

@@ -2,6 +2,7 @@ package cluster
 
 import (
 	"github.com/jglobant/yale/framework"
+	"github.com/jglobant/yale/model"
 	"github.com/jglobant/yale/monitor"
 	"github.com/jglobant/yale/service"
 	"github.com/jglobant/yale/util"
@@ -45,7 +46,7 @@ func (sm *StackManager) AppendStack(fh *framework.FrameworkHelper) {
 	sm.stacks[key] = NewStack(key, sm.stackNotification, fh)
 }
 
-func (sm *StackManager) Deploy(serviceConfig service.ServiceConfig, smokeConfig monitor.MonitorConfig, warmConfig monitor.MonitorConfig, instances int, tolerance float64) bool {
+func (sm *StackManager) Deploy(serviceConfig model.ServiceConfig, smokeConfig monitor.MonitorConfig, warmConfig monitor.MonitorConfig, instances int, tolerance float64) bool {
 	for stackKey, _ := range sm.stacks {
 		if err := sm.stacks[stackKey].LoadFilteredContainers(serviceConfig.ImageName, serviceConfig.Tag, ".*"); err != nil {
 			return false

@@ -4,11 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"regexp"
 	"strconv"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/jglobant/yale/helper"
+	"github.com/jglobant/yale/model"
 	"github.com/jglobant/yale/monitor"
 	"github.com/jglobant/yale/util"
 	"github.com/fsouza/go-dockerclient"
@@ -57,30 +57,6 @@ func (s State) String() string {
 	return state[s-1]
 }
 
-type ServiceConfig struct {
-	ServiceId string
-	CpuShares int
-	Envs      []string
-	ImageName string
-	Memory    int64
-	Publish   []string
-	Tag       string
-}
-
-func (s *ServiceConfig) Version() string {
-	rp := regexp.MustCompile("^([\\d\\.]+)-")
-	result := rp.FindStringSubmatch(s.Tag)
-	if result == nil {
-		util.Log.Fatalln("Formato de TAG invalido")
-	}
-	return result[1]
-}
-
-func (s *ServiceConfig) String() string {
-	return fmt.Sprintf("ImageName: %s - Tag: %s - CpuShares: %d - Memory: %s - Publish: %#v - Envs: %s", s.ImageName, s.Tag, s.CpuShares, s.Memory, s.Publish, util.MaskEnv(s.Envs))
-}
-
-
 // Generic Service Interface for all frameworks
 type Service interface {
 	GetId() string
@@ -89,7 +65,7 @@ type Service interface {
 	GetStep() string
 	SetState(status State)
 	CheckState(state State) bool
-	Run(serviceConfig ServiceConfig)
+	Run(serviceConfig model.ServiceConfig)
 	Undeploy()
 	ContainerName() string
 	ContainerImageName() string
@@ -202,7 +178,7 @@ func (ds *DockerService) CheckState(state State) bool {
 	return false
 }
 
-func (ds *DockerService) Run(serviceConfig ServiceConfig) {
+func (ds *DockerService) Run(serviceConfig model.ServiceConfig) {
 	ds.log.Infoln("Iniciando el despliegue del servicio")
 	labels := map[string]string{
 		"image_name": serviceConfig.ImageName,

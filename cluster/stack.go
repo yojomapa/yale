@@ -5,6 +5,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/jglobant/yale/helper"
 	"github.com/jglobant/yale/framework"
+	"github.com/jglobant/yale/model"
 	"github.com/jglobant/yale/monitor"
 	"github.com/jglobant/yale/service"
 	"github.com/jglobant/yale/util"
@@ -85,7 +86,7 @@ func (s *Stack) createMonitor(config monitor.MonitorConfig) monitor.Monitor {
 	return mon
 }
 
-func (s *Stack) DeployCheckAndNotify(serviceConfig service.ServiceConfig, smokeConfig monitor.MonitorConfig, warmConfig monitor.MonitorConfig, instances int, tolerance float64) {
+func (s *Stack) DeployCheckAndNotify(serviceConfig model.ServiceConfig, smokeConfig monitor.MonitorConfig, warmConfig monitor.MonitorConfig, instances int, tolerance float64) {
 	currentContainers := s.countServicesWithState(service.RUNNING)
 
 	if currentContainers == instances {
@@ -124,7 +125,7 @@ func (s *Stack) addNewService(dockerService *service.DockerService) {
 	s.services = append(s.services, dockerService)
 }
 
-func (s *Stack) deployOneInstance(serviceConfig service.ServiceConfig) {
+func (s *Stack) deployOneInstance(serviceConfig model.ServiceConfig) {
 	/*dockerService := service.NewDockerService(s.createId(), s.frameworkApiHelper, s.serviceIdNotification)
 	s.addNewService(dockerService)
 	dockerService.Run(serviceConfig)*/
@@ -193,7 +194,7 @@ func (s *Stack) countServicesWithState(state service.State) int {
 	return len(s.ServicesWithState(state))
 }
 
-func (s *Stack) checkInstances(serviceConfig service.ServiceConfig, totalInstances int, tolerance float64) bool {
+func (s *Stack) checkInstances(serviceConfig model.ServiceConfig, totalInstances int, tolerance float64) bool {
 	for {
 		s.log.Infoln("Esperando notificación de los servicios")
 		serviceId := <-s.serviceIdNotification
