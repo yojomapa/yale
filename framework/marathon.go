@@ -35,16 +35,22 @@ func NewMarathonTlsVerifyHelper(endpointUrl, cert,  key, ca string) (*MarathonHe
 	return nil, errors.New("Not implemented yet")
 }
 
-func (helper *MarathonHelper) ListServices() []string {
+func (helper *MarathonHelper) ListServices(serviceName string) []model.Container {
 	
-	applications, _ := helper.client.Applications(nil)
-	marathonApps := applications.Apps
-	appList := make([]string, len(marathonApps))
+	application, _ := helper.client.Application(serviceName)
+	tasks := application.Tasks
+	containers := make([]model.Container, len(tasks))
 	
-	for i, app := range marathonApps {
-		appList[i] = app.ID
+	for i, task := range tasks {
+		containers[i].ID = task.ID
+		containers[i].Type = application.Container.Type
+		//containers[i].Name = task.Name
+		containers[i].Ports = task.Ports
+		containers[i].Node = task.Host
+		//containers[i].State = task.
+		containers[i].Created = task.StagedAt
 	}
-	return appList
+	return containers
 }
 
 func (helper *MarathonHelper) DeployService(config model.ServiceConfig) (error) {

@@ -3,7 +3,7 @@ package framework
 import "github.com/jglobant/yale/model"
 
 type FrameworkHelper interface {
-	ListServices() []string
+	ListServices(serviceName string) []model.Container
 	DeployService(config model.ServiceConfig) (error)
 	ScaleService(id string, instances int) (error)
 	DeleteService(id string) (error)

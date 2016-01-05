@@ -26,8 +26,8 @@ func TestListServices(t *testing.T) {
 		t.Errorf("Error: " + error.Error())
 	}
 	
-	services := helper.ListServices();
-	assert.Equal(t, 1, len(services), "Should have found one service")
+	services := helper.ListServices("nginx");
+	assert.Equal(t, 2, len(services), "Should have found two services")
 }
 
 func TestDeployService(t *testing.T) {
