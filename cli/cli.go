@@ -181,17 +181,21 @@ func setupGlobalFlags(c *cli.Context) error {
 	for _, ep := range c.StringSlice("endpoint") {
 		util.Log.Infof("Configurando el endpoint de Docker %s", ep)
 		var fh framework.FrameworkHelper
+		fCfg := framework.FrameworkConfig {
+			Type : framework.MARATHON,
+			EndpointUrl : ep,
+		}
 		if c.Bool("tlsverify") {
-			ca := buildCertPath(c.String("cert_path"), c.String("tlscacert"))
-			cert := buildCertPath(c.String("cert_path"), c.String("tlscert"))
-			key := buildCertPath(c.String("cert_path"), c.String("tlskey"))
-			fh, err = framework.NewFrameworkTlsVerifyHelper(ep, cert, key, ca)
+			fCfg.Ca = buildCertPath(c.String("cert_path"), c.String("tlscacert"))
+			fCfg.Cert = buildCertPath(c.String("cert_path"), c.String("tlscert"))
+			fCfg.Key = buildCertPath(c.String("cert_path"), c.String("tlskey"))
+			fh, err = framework.NewFrameworkTlsVerifyHelper(fCfg)
 		} else if c.Bool("tls") {
-			cert := buildCertPath(c.String("cert_path"), c.String("tlscert"))
-			key := buildCertPath(c.String("cert_path"), c.String("tlskey"))
-			fh, err = framework.NewFrameworkTlsHelper(ep, cert, key)
+			fCfg.Cert = buildCertPath(c.String("cert_path"), c.String("tlscert"))
+			fCfg.Key = buildCertPath(c.String("cert_path"), c.String("tlskey"))
+			fh, err = framework.NewFrameworkTlsHelper(fCfg)
 		} else {
-			fh, err = framework.NewFrameworkHelper(ep)
+			fh, err = framework.NewFrameworkHelper(fCfg)
 		}
 
 		if err != nil {

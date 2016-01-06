@@ -11,7 +11,11 @@ import (
 func TestConstructor(t *testing.T) {
 	sm:= NewStackManager()
 	assert.True(t, sm != nil, "Instance should be healthy")
-	helper, _ := framework.NewFrameworkHelper("http://localhost:8081")
+        cfg := framework.FrameworkConfig{
+                EndpointUrl : "http://localhost:8081",
+                Type : framework.MARATHON,
+        }
+	helper, _ := framework.NewFrameworkHelper(cfg)
 	sm.AppendStack(&helper)
         v := reflect.ValueOf(sm).Elem()
         stacks := v.FieldByName("stacks")

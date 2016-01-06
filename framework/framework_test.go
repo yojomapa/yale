@@ -7,17 +7,48 @@ import (
 )
 
 func TestCreateFramework(t *testing.T) {
-	helper, error := NewFrameworkHelper("http://localhost:8081")
+	cfg := FrameworkConfig{
+		EndpointUrl : "http://localhost:8081",
+		Type : MARATHON,
+	}
+	helper, error := NewFrameworkHelper(cfg)
 	assert.True(t, error == nil, "Helper should not return error")
 	assert.Equal(t, "*framework.MarathonHelper", fmt.Sprintf("%T", helper), "Type of helper should be *framework.MarathonHelper")
 }
 
+func TestCreateNotSupportedFramework(t *testing.T) {
+        cfg := FrameworkConfig{
+                EndpointUrl : "http://localhost:8081",
+                Type : SWARM,
+        }
+        _, error := NewFrameworkHelper(cfg)
+        assert.NotNil(t, error, "Should throw error because Framework is not supported yet")
+        _, error = NewFrameworkTlsHelper(cfg)
+        assert.NotNil(t, error, "Should throw error because Framework is not supported yet")
+        _, error = NewFrameworkTlsVerifyHelper(cfg)
+        assert.NotNil(t, error, "Should throw error because Framework is not supported yet")
+}
+
+
 func TestCreateFrameworkTls(t *testing.T) {
-        _, error := NewFrameworkTlsHelper("http://localhost:8081", "cert-path", "key-path")
+        cfg := FrameworkConfig{
+                EndpointUrl : "http://localhost:8081",
+                Type : MARATHON,
+		Cert : "cert-path",
+		Key : "key-path",
+        }
+        _, error := NewFrameworkTlsHelper(cfg)
 	assert.True(t, error != nil, "Helper is not implemented yet")
 }
 
 func TestCreateFrameworkTlsVerify(t *testing.T) {
-        _, error := NewFrameworkTlsVerifyHelper("http://localhost:8081", "cert-path", "key-path", "ca-path")
+        cfg := FrameworkConfig{
+                EndpointUrl : "http://localhost:8081",
+                Type : MARATHON,
+                Cert : "cert-path",
+                Key : "key-path",
+		Ca : "ca-path",
+        }
+        _, error := NewFrameworkTlsVerifyHelper(cfg)
 	assert.True(t, error != nil, "Helper is not implemented yet")
 }
