@@ -5,11 +5,12 @@ import (
 	"github.com/jglobant/yale/model"
 )
 
-type FrameworkHelper interface {
-	ListServices(serviceName string) []model.Container
+type Framework interface {
+	ListServices(serviceName string) []*model.Instance
 	DeployService(config model.ServiceConfig) (error)
 	ScaleService(id string, instances int) (error)
 	DeleteService(id string) (error)
+	UndeployInstance(instance *model.Instance) (error)
 }
 
 type FrameworkType int
@@ -28,26 +29,26 @@ type FrameworkConfig struct {
 	Ca		string	
 }
 
-func NewFrameworkHelper(cfg FrameworkConfig) (FrameworkHelper, error) {
+func NewFramework(cfg FrameworkConfig) (Framework, error) {
 	switch cfg.Type {
 		case MARATHON:
-			return NewMarathonHelper(cfg.EndpointUrl)
+			return NewMarathon(cfg.EndpointUrl)
 	}
 	return nil, errors.New("Not implemented yet")
 }
 
-func NewFrameworkTlsHelper(cfg FrameworkConfig) (FrameworkHelper, error) {
+func NewFrameworkTlsHelper(cfg FrameworkConfig) (Framework, error) {
         switch cfg.Type {
                 case MARATHON:
-                        return NewMarathonTlsHelper(cfg.EndpointUrl, cfg.Cert,  cfg.Key)
+                        return NewMarathonTls(cfg.EndpointUrl, cfg.Cert,  cfg.Key)
         }
         return nil, errors.New("Not implemented yet")
 }
 
-func NewFrameworkTlsVerifyHelper(cfg FrameworkConfig) (FrameworkHelper, error) {
+func NewFrameworkTlsVerifyHelper(cfg FrameworkConfig) (Framework, error) {
         switch cfg.Type {
                 case MARATHON:
-		return NewMarathonTlsVerifyHelper(cfg.EndpointUrl, cfg.Cert,  cfg.Key, cfg.Ca)                    
+		return NewMarathonTlsVerify(cfg.EndpointUrl, cfg.Cert,  cfg.Key, cfg.Ca)                    
         }
         return nil, errors.New("Not implemented yet")
 }

@@ -180,7 +180,7 @@ func setupGlobalFlags(c *cli.Context) error {
 
 	for _, ep := range c.StringSlice("endpoint") {
 		util.Log.Infof("Configurando el endpoint de Docker %s", ep)
-		var fh framework.FrameworkHelper
+		var fh framework.Framework
 		fCfg := framework.FrameworkConfig {
 			Type : framework.MARATHON,
 			EndpointUrl : ep,
@@ -195,14 +195,14 @@ func setupGlobalFlags(c *cli.Context) error {
 			fCfg.Key = buildCertPath(c.String("cert_path"), c.String("tlskey"))
 			fh, err = framework.NewFrameworkTlsHelper(fCfg)
 		} else {
-			fh, err = framework.NewFrameworkHelper(fCfg)
+			fh, err = framework.NewFramework(fCfg)
 		}
 
 		if err != nil {
 			fmt.Println("No se pudo configurar el endpoint del Framework")
 			return err
 		}
-		stackManager.AppendStack(&fh)
+		stackManager.AppendStack(fh)
 	}
 
 	return nil

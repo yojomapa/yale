@@ -184,19 +184,19 @@ func deployCmd(c *cli.Context) {
 
 	handleDeploySigTerm(stackManager)
 	if stackManager.Deploy(serviceConfig, smokeConfig, warmUpConfig, c.Int("instances"), c.Float64("tolerance")) {
-		services := stackManager.DeployedContainers()
+		instances := stackManager.DeployedContainers()
 		var resume []callbackResume
 
-		for k := range services {
-			if addr, err := services[k].AddressAndPort(8080); err != nil {
+		for k := range instances {
+			if addr := instances[k].Ports[0]; addr == 0  {
 				util.Log.Errorln(err)
 			} else {
-				util.Log.Infof("Se desplegó %s con el tag de registrator %s y dirección %s", services[k].GetId(), services[k].RegistratorId(), addr)
-				containerInfo := callbackResume{
-					RegisterId: services[k].RegistratorId(),
-					Address:    addr,
+				util.Log.Infof("Se desplegó %s con el tag de registrator %s y dirección %s", instances[k].Id, instances[k].RegistratorId(), addr)
+				instanceInfo := callbackResume{
+					RegisterId: instances[k].RegistratorId(),
+					Address:    string(addr),
 				}
-				resume = append(resume, containerInfo)
+				resume = append(resume, instanceInfo)
 			}
 		}
 

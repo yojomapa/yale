@@ -11,9 +11,9 @@ func TestCreateFramework(t *testing.T) {
 		EndpointUrl : "http://localhost:8081",
 		Type : MARATHON,
 	}
-	helper, error := NewFrameworkHelper(cfg)
+	helper, error := NewFramework(cfg)
 	assert.True(t, error == nil, "Helper should not return error")
-	assert.Equal(t, "*framework.MarathonHelper", fmt.Sprintf("%T", helper), "Type of helper should be *framework.MarathonHelper")
+	assert.Equal(t, "*framework.Marathon", fmt.Sprintf("%T", helper), "Type of helper should be *framework.Marathon")
 }
 
 func TestCreateNotSupportedFramework(t *testing.T) {
@@ -21,7 +21,7 @@ func TestCreateNotSupportedFramework(t *testing.T) {
                 EndpointUrl : "http://localhost:8081",
                 Type : SWARM,
         }
-        _, error := NewFrameworkHelper(cfg)
+        _, error := NewFramework(cfg)
         assert.NotNil(t, error, "Should throw error because Framework is not supported yet")
         _, error = NewFrameworkTlsHelper(cfg)
         assert.NotNil(t, error, "Should throw error because Framework is not supported yet")

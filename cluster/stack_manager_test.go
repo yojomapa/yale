@@ -15,8 +15,8 @@ func TestConstructor(t *testing.T) {
                 EndpointUrl : "http://localhost:8081",
                 Type : framework.MARATHON,
         }
-	helper, _ := framework.NewFrameworkHelper(cfg)
-	sm.AppendStack(&helper)
+	helper, _ := framework.NewFramework(cfg)
+	sm.AppendStack(helper)
         v := reflect.ValueOf(sm).Elem()
         stacks := v.FieldByName("stacks")
         assert.Equal(t, 1, stacks.Len(), "Cli should instantiate at least one stack")

@@ -11,7 +11,7 @@ import (
 )
 
 func TestConstructorError(t *testing.T) {
-	_, err := NewMarathonHelper("malformed url")
+	_, err := NewMarathon("malformed url")
 	assert.True(t, err != nil, "Malformed Url should throw error")
 }
 
@@ -20,20 +20,20 @@ func TestListServices(t *testing.T) {
 	ts := setup("../test/resources/marathon_tasks_response.json")
 	defer ts.Close()
 
-	helper, error := NewMarathonHelper(ts.URL)
+	m, error := NewMarathon(ts.URL)
 	
 	if error != nil {
 		t.Errorf("Error: " + error.Error())
 	}
 	
-	services := helper.ListServices("nginx");
+	services := m.ListServices("nginx");
 	assert.Equal(t, 2, len(services), "Should have found two services")
 }
 
 func TestDeployService(t *testing.T) {
 	ts := setup("../test/resources/marathon_new_app_response.json")
         defer ts.Close()
-	helper, error := NewMarathonHelper(ts.URL)
+	helper, error := NewMarathon(ts.URL)
 
 	if error != nil {
 		t.Errorf("Error: " + error.Error())
@@ -46,7 +46,7 @@ func TestDeployService(t *testing.T) {
 func TestErrorDeployService(t *testing.T) {
 	ts := setupFailure()
         defer ts.Close()
-        helper, error := NewMarathonHelper(ts.URL)
+        helper, error := NewMarathon(ts.URL)
 
         if error != nil {
                 t.Errorf("Error: " + error.Error())
@@ -58,7 +58,7 @@ func TestErrorDeployService(t *testing.T) {
 func TestScaleService(t *testing.T) {
 	ts := setup("../test/resources/marathon_update_instances_response.json")
         defer ts.Close()
-        helper, error := NewMarathonHelper(ts.URL)
+        helper, error := NewMarathon(ts.URL)
 
         if error != nil {
                 t.Errorf("Error: " + error.Error())
@@ -71,7 +71,7 @@ func TestScaleService(t *testing.T) {
 func TestErrorScaleService(t *testing.T) {
         ts := setupFailure()
 	defer ts.Close()
-        helper, error := NewMarathonHelper(ts.URL)
+        helper, error := NewMarathon(ts.URL)
 
         if error != nil {
                 t.Errorf("Error: " + error.Error())
@@ -83,7 +83,7 @@ func TestErrorScaleService(t *testing.T) {
 func TestDeleteService(t *testing.T) {
         ts := setup("../test/resources/marathon_delete_app_response.json")
 	defer ts.Close()
-	helper, error := NewMarathonHelper(ts.URL)
+	helper, error := NewMarathon(ts.URL)
 
         if error != nil {
                 t.Errorf("Error: " + error.Error())
@@ -96,7 +96,7 @@ func TestDeleteService(t *testing.T) {
 func TestErrorDeleteService(t *testing.T) {
 	ts := setupFailure()
 	defer ts.Close()
-        helper, error := NewMarathonHelper(ts.URL)
+        helper, error := NewMarathon(ts.URL)
         
         if error != nil {
                 t.Errorf("Error: " + error.Error())
@@ -120,4 +120,15 @@ func setup(url string) (*httptest.Server) {
                 fmt.Fprintln(w, string(content))
         }))
 	return ts
+}
+
+func TestUndeployInstance(t *testing.T) {
+        m, error := NewMarathon("http://localhost:8081")
+
+        if error != nil {
+                t.Errorf("Error: " + error.Error())
+        }
+	i := model.Instance{}
+        err := m.UndeployInstance(&i)
+        assert.True(t, err == nil, "Delete should work")
 }
