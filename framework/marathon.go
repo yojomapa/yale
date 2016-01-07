@@ -39,18 +39,20 @@ func (helper *Marathon) ListServices(serviceName string) []*model.Instance {
 	
 	application, _ := helper.client.Application(serviceName)
 	tasks := application.Tasks
-	containers := make([]*model.Instance, len(tasks))
+	instances := make([]*model.Instance, len(tasks))
 	
 	for i, task := range tasks {
-		containers[i].Id = task.ID
-		containers[i].Type = application.Container.Type
-		//containers[i].Name = task.Name
-		containers[i].Ports = task.Ports
-		containers[i].Node = task.Host
-		//containers[i].State = task.
-		containers[i].Created = task.StagedAt
+		instance := model.Instance{}
+		instance.Id = task.ID
+		instance.Type = application.Container.Type
+		//instance.Name = task.Name
+		instance.Ports = task.Ports
+		instance.Node = task.Host
+		//instance.State = task.
+		instance.Created = task.StagedAt
+		instances[i] = &instance
 	}
-	return containers
+	return instances
 }
 
 func (helper *Marathon) DeployService(config model.ServiceConfig) (error) {

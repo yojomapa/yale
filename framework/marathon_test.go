@@ -130,5 +130,5 @@ func TestUndeployInstance(t *testing.T) {
         }
 	i := model.Instance{}
         err := m.UndeployInstance(&i)
-        assert.True(t, err == nil, "Delete should work")
+        assert.NotNil(t, err, "UndeployInstance should not work")
 }
