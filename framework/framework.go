@@ -3,6 +3,7 @@ package framework
 import (
 	"errors"
 	"github.com/jglobant/yale/model"
+	"strings"
 )
 
 type Framework interface {
@@ -19,6 +20,7 @@ const (
 	MARATHON FrameworkType = 1 << iota
 	CHRONOS
 	SWARM
+	NOT_VALID
 )
 
 type FrameworkConfig struct {
@@ -51,4 +53,12 @@ func NewFrameworkTlsVerifyHelper(cfg FrameworkConfig) (Framework, error) {
 		return NewMarathonTlsVerify(cfg.EndpointUrl, cfg.Cert,  cfg.Key, cfg.Ca)                    
         }
         return nil, errors.New("Not implemented yet")
+}
+
+func GetFrameworkType(aType string) FrameworkType {
+	switch strings.ToUpper(aType) {
+		case "MARATHON":
+			return MARATHON		
+	}
+	return NOT_VALID
 }

@@ -81,9 +81,12 @@ func globalFlags() []cli.Flag {
 		},
 		cli.StringSliceFlag{
 			Name:   "endpoint, ep",
-			Usage:  "Endpoint de la API de Docker",
-			EnvVar: "DOCKER_HOST",
+			Usage:  "Endpoint de la API del Scheduler",
 		},
+                cli.StringFlag{
+                        Name:   "framework",
+                        Usage:  "Scheduler you want to use to orchestrate your containers",
+                },
 		cli.BoolFlag{
 			Name:  "tls",
 			Usage: "Utiliza TLS en la comunicacion con los Endpoints",
@@ -115,12 +118,6 @@ func globalFlags() []cli.Flag {
 			Value:  "key.pem",
 			Usage:  "Ruta relativa del arhivo con la llave del certificado cliente",
 			EnvVar: "DEPLOYER_CERT_KEY",
-		},
-		cli.StringFlag{
-			Name:   "auth-file",
-			Value:  dockerCfgPath(),
-			Usage:  "Archivo de configuracion de la autenticacion",
-			EnvVar: "DEPLOYER_AUTH_CONFIG",
 		},
 		cli.StringFlag{
 			Name:   "log-level",
@@ -176,6 +173,12 @@ func setupGlobalFlags(c *cli.Context) error {
 		return err
 	}
 
+	frameworkType := c.String("framework")
+	if (frameworkType == "" || framework.GetFrameworkType(frameworkType) == framework.NOT_VALID){
+		fmt.Println("bla")
+		return errors.New("Invalid type of scheduler")
+	}
+
 	stackManager = cluster.NewStackManager()
 
 	for _, ep := range c.StringSlice("endpoint") {
@@ -211,8 +214,8 @@ func setupGlobalFlags(c *cli.Context) error {
 func RunApp() {
 
 	app := cli.NewApp()
-	app.Name = "yale"
-	app.Usage = "Despliegue de App Docker con esteroides"
+	app.Name = "cloud-crane"
+	app.Usage = "Multi-Scheduler Orchestrator"
 	app.Version = version.VERSION + " (" + version.GITCOMMIT + ")"
 
 	app.Flags = globalFlags()
@@ -224,7 +227,7 @@ func RunApp() {
 	app.Commands = commands
 
 	var err error
-	logFile, err = os.OpenFile("yale.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	logFile, err = os.OpenFile("cloud-crane.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		util.Log.Warnln("Error al abrir el archivo")
 	} else {

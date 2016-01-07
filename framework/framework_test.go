@@ -52,3 +52,10 @@ func TestCreateFrameworkTlsVerify(t *testing.T) {
         _, error := NewFrameworkTlsVerifyHelper(cfg)
 	assert.True(t, error != nil, "Helper is not implemented yet")
 }
+
+func TestGetFrameworkType(t *testing.T) {
+	res := GetFrameworkType("bla")
+	assert.Equal(t, NOT_VALID, res, "Framework type should not be valid")
+	res = GetFrameworkType("MaRaThOn")
+	assert.Equal(t, MARATHON, res, "Framework type should be MARATHON")
+}
