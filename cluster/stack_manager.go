@@ -46,16 +46,12 @@ func (sm *StackManager) AppendStack(fh framework.Framework) {
 }
 
 func (sm *StackManager) Deploy(serviceConfig model.ServiceConfig, smokeConfig monitor.MonitorConfig, warmConfig monitor.MonitorConfig, instances int, tolerance float64) bool {
+	util.Log.Infoln("enter deploy stack manager %d", len(sm.stacks))
+	
 	for stackKey, _ := range sm.stacks {
-		if err := sm.stacks[stackKey].LoadInstances(serviceConfig.ServiceId); err != nil {
-			return false
-		}
+		sm.stacks[stackKey].DeployCheckAndNotify(serviceConfig, smokeConfig, warmConfig, instances, tolerance)
 	}
-
-	for stackKey, _ := range sm.stacks {
-		go sm.stacks[stackKey].DeployCheckAndNotify(serviceConfig, smokeConfig, warmConfig, instances, tolerance)
-	}
-
+/*
 	for i := 0; i < len(sm.stacks); i++ {
 		stackStatus := <-sm.stackNotification
 		util.Log.Infoln("Se recibió notificación del Stack con estado", stackStatus)
@@ -64,7 +60,7 @@ func (sm *StackManager) Deploy(serviceConfig model.ServiceConfig, smokeConfig mo
 			sm.Rollback()
 			return false
 		}
-	}
+	}*/
 	util.Log.Infoln("Proceso de deploy OK")
 	return true
 }

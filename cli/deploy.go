@@ -150,7 +150,7 @@ func deployCmd(c *cli.Context) {
 	for _, v := range c.StringSlice("env") {
 		envs = append(envs, v)
 	}
-
+	
 	serviceConfig := model.ServiceConfig{
 		ServiceId: c.String("service-id"),
 		CpuShares: c.Int("cpu"),

@@ -7,6 +7,7 @@ import (
 	"github.com/jglobant/yale/model"
 	"github.com/jglobant/yale/monitor"
 	"github.com/jglobant/yale/util"
+	"fmt"
 )
 
 type StackStatus int
@@ -85,28 +86,9 @@ func (s *Stack) createMonitor(config monitor.MonitorConfig) monitor.Monitor {
 }
 
 func (s *Stack) DeployCheckAndNotify(serviceConfig model.ServiceConfig, smokeConfig monitor.MonitorConfig, warmConfig monitor.MonitorConfig, instances int, tolerance float64) {
-	currentContainers := s.countServicesWithState(model.RUNNING)
-
-	if currentContainers == instances {
-		s.log.Infoln("El Stack ya estaba desplegado. Omitiendo...")
-		s.setStatus(STACK_READY)
-	} else if currentContainers < instances {
-		diff := instances - currentContainers
-		s.log.Printf("El Stack tenia %d instancias. Se desplegaran %d instancias más.", currentContainers, diff)
-		s.smokeTestMonitor = s.createMonitor(smokeConfig)
-		s.warmUpMonitor = s.createMonitor(warmConfig)
-
-		for i := 1; i <= diff; i++ {
-			s.log.Debugf("Desplegando instancia número %d", i)
-			s.frameworkApiHelper.DeployService(serviceConfig)
-		}
-
-		s.setStatus(STACK_READY)
-	} else {
-		diff := currentContainers - instances
-		s.log.Printf("El Stack tenia más instancias de las necesarias (%d from %d). Comenzando el undeploy...", currentContainers, instances)
-		s.UndeployInstances(diff)
-		s.setStatus(STACK_READY)
+	_, err := s.frameworkApiHelper.DeployService(serviceConfig)
+	if err != nil {
+		fmt.Println(err)
 	}
 }
 
@@ -164,9 +146,4 @@ func (s *Stack) countServicesWithStep(step model.Step) int {
 
 func (s *Stack) countServicesWithState(state model.State) int {
 	return len(s.ServicesWithState(state))
-}
-
-func (s *Stack) LoadInstances(serviceName string) error {
-	s.instances = s.frameworkApiHelper.ListServices(serviceName)
-	return nil
 }

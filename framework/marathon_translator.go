@@ -3,8 +3,9 @@ package framework
 import (
         "github.com/gambol99/go-marathon"
 	"github.com/jglobant/yale/model"
-	"github.com/jglobant/yale/util"
         "strconv"
+	"fmt"
+	"encoding/json"
 )
 
 func translateServiceConfig(config model.ServiceConfig) *marathon.Application {
@@ -15,19 +16,25 @@ func translateServiceConfig(config model.ServiceConfig) *marathon.Application {
                 "image_tag":  config.Tag,
         }
 
-        application.ID = config.ServiceId
-        application.Name(imageWithTag)
-        application.CPU(0.1) // how to map this ?
-        application.Memory(float64(config.Memory))
+        application.Name(config.ServiceId)
+        application.CPU(0.25) // how to map this ?
+        //application.Memory(float64(config.Memory))
+        application.Memory(64)
         application.Count(config.Instances)
-        //application.Arg("/usr/sbin/apache2ctl", "-D", "FOREGROUND")
-        application.Env = util.StringSlice2Map(config.Envs)
+        //application.Env = util.StringSlice2Map(config.Envs)
         application.Labels = labels
+	//application.RequirePorts = true
+
         // add the docker container
         application.Container.Docker.Container(imageWithTag)
-        //application.Container.Docker.Expose(80, 443)
-        application.Container.Docker.PortMappings = createPorMappings(config.Publish)
+        application.Container.Docker.Expose(80, 443)
+        //application.Container.Docker.PortMappings = createPorMappings(config.Publish)
+	s := []string{"80", "443"}
+        application.Container.Docker.PortMappings = createPorMappings(s)
         //application.CheckHTTP("/health", 10, 5)
+
+	b, _ := json.Marshal(application)
+	fmt.Println(string(b))
         return application
 }
 

@@ -26,7 +26,7 @@ func TestListServices(t *testing.T) {
 		t.Errorf("Error: " + error.Error())
 	}
 	
-	services := m.ListServices("nginx");
+	services, _ := m.ListServices("nginx");
 	assert.Equal(t, 2, len(services), "Should have found two services")
 }
 
@@ -39,8 +39,9 @@ func TestDeployService(t *testing.T) {
 		t.Errorf("Error: " + error.Error())
 	}
 	
-	err := helper.DeployService(model.ServiceConfig{})
-	assert.True(t, err == nil, "Deploy should work")
+	instances, err := helper.DeployService(model.ServiceConfig{})
+	assert.Nil(t, err, "Deploy should work")
+	assert.NotNil(t, instances, "Should return new instances")
 }
 
 func TestErrorDeployService(t *testing.T) {
@@ -51,8 +52,8 @@ func TestErrorDeployService(t *testing.T) {
         if error != nil {
                 t.Errorf("Error: " + error.Error())
         }
-	err := helper.DeployService(model.ServiceConfig{})
-	assert.True(t, err != nil, "Deploy should throw error")
+	_, err := helper.DeployService(model.ServiceConfig{})
+	assert.NotNil(t, err, "Deploy should throw error")
 }
 
 func TestScaleService(t *testing.T) {
@@ -64,8 +65,9 @@ func TestScaleService(t *testing.T) {
                 t.Errorf("Error: " + error.Error())
         }
 
-        err := helper.ScaleService("nginx", 2)
-        assert.True(t, err == nil, "Scale should work")
+        instances, err := helper.ScaleService("nginx", 2)
+        assert.Nil(t, err, "Scale should work")
+	assert.NotNil(t, instances, "Scale should return instances")
 }
 
 func TestErrorScaleService(t *testing.T) {
@@ -76,7 +78,7 @@ func TestErrorScaleService(t *testing.T) {
         if error != nil {
                 t.Errorf("Error: " + error.Error())
         }
-        err := helper.ScaleService("error-id", -1)
+        _, err := helper.ScaleService("error-id", -1)
         assert.True(t, err != nil, "Scale should throw error")
 }
 

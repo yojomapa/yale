@@ -7,9 +7,7 @@ import (
 )
 
 type Framework interface {
-	ListServices(serviceName string) []*model.Instance
-	DeployService(config model.ServiceConfig) (error)
-	ScaleService(id string, instances int) (error)
+	DeployService(config model.ServiceConfig) ([]*model.Instance, error)
 	DeleteService(id string) (error)
 	UndeployInstance(instance *model.Instance) (error)
 }

@@ -175,7 +175,6 @@ func setupGlobalFlags(c *cli.Context) error {
 
 	frameworkType := c.String("framework")
 	if (frameworkType == "" || framework.GetFrameworkType(frameworkType) == framework.NOT_VALID){
-		fmt.Println("bla")
 		return errors.New("Invalid type of scheduler")
 	}
 
