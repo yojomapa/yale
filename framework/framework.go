@@ -7,6 +7,7 @@ import (
 )
 
 type Framework interface {
+	FindServiceInformation(serviceName string) ([]*model.Instance, error)
 	DeployService(config model.ServiceConfig) ([]*model.Instance, error)
 	DeleteService(id string) (error)
 	UndeployInstance(instance *model.Instance) (error)

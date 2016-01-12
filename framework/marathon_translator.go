@@ -28,9 +28,9 @@ func translateServiceConfig(config model.ServiceConfig) *marathon.Application {
         // add the docker container
         application.Container.Docker.Container(imageWithTag)
         application.Container.Docker.Expose(80, 443)
-        //application.Container.Docker.PortMappings = createPorMappings(config.Publish)
-	s := []string{"80", "443"}
-        application.Container.Docker.PortMappings = createPorMappings(s)
+        application.Container.Docker.PortMappings = createPorMappings(config.Publish)
+	//s := []string{"80", "443"}
+        //application.Container.Docker.PortMappings = createPorMappings(s)
         //application.CheckHTTP("/health", 10, 5)
 
 	b, _ := json.Marshal(application)

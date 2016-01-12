@@ -36,7 +36,11 @@ func NewMarathonTlsVerify(endpointUrl, cert,  key, ca string) (*Marathon, error)
 	return nil, errors.New("Not implemented yet")
 }
 
-func (helper *Marathon) ListServices(serviceName string) ([]*model.Instance, error) {
+func (helper *Marathon) SetClient(client marathon.Marathon) {
+	helper.client = client
+}
+
+func (helper *Marathon) FindServiceInformation(serviceName string) ([]*model.Instance, error) {
 	app, err := helper.client.Application(serviceName)
         if err != nil {
                 return nil, err
@@ -71,12 +75,13 @@ func (helper *Marathon) DeployService(config model.ServiceConfig) ([]*model.Inst
 	if (!helper.containsApp(apps, config.ServiceId)) {
 		return helper.createService(config)
 	} else {
-		return nil, errors.New("update service not implemented yet")
+		return helper.scaleService(config.ServiceId, config.Instances)
 	}
 }
 
 func (helper *Marathon) scaleService(id string, instances int) ([]*model.Instance, error){
 	// TODO define if it is up or downscale
+	// todo identify current instances, ver si actualizacion es necesario
 	deploymentId, err := helper.client.ScaleApplicationInstances(id, instances, true)
 	if err != nil {
     		util.Log.Errorf("Failed to Scale the application: %s, error: %s", id, err)
