@@ -2,7 +2,6 @@ package cluster
 
 import (
 	"github.com/jglobant/yale/framework"
-	"github.com/jglobant/yale/model"
 	"github.com/jglobant/yale/monitor"
 	"github.com/jglobant/yale/util"
 )
@@ -45,7 +44,7 @@ func (sm *StackManager) AppendStack(fh framework.Framework) {
 	sm.stacks[key] = NewStack(key, sm.stackNotification, fh)
 }
 
-func (sm *StackManager) Deploy(serviceConfig model.ServiceConfig, smokeConfig monitor.MonitorConfig, warmConfig monitor.MonitorConfig, instances int, tolerance float64) bool {
+func (sm *StackManager) Deploy(serviceConfig framework.ServiceConfig, smokeConfig monitor.MonitorConfig, warmConfig monitor.MonitorConfig, instances int, tolerance float64) bool {
 	util.Log.Infoln("enter deploy stack manager %d", len(sm.stacks))
 	
 	for stackKey, _ := range sm.stacks {
@@ -65,12 +64,8 @@ func (sm *StackManager) Deploy(serviceConfig model.ServiceConfig, smokeConfig mo
 	return true
 }
 
-func (sm *StackManager) DeployedContainers() []*model.Instance {
-	var containers []*model.Instance
-
-	for stackKey, _ := range sm.stacks {
-		containers = append(containers, sm.stacks[stackKey].ServicesWithStep(model.STEP_WARM_READY)...)
-	}
+func (sm *StackManager) DeployedContainers() []*framework.Instance {
+	var containers []*framework.Instance
 
 	return containers
 }

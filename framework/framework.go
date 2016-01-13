@@ -2,15 +2,16 @@ package framework
 
 import (
 	"errors"
-	"github.com/jglobant/yale/model"
 	"strings"
 )
 
+// Framework es una interfaz que debe implementar para la comunicacion con los Schedulers de Docker
+// Para un ejemplo ir a swarm.Framework
 type Framework interface {
-	FindServiceInformation(serviceName string) ([]*model.Instance, error)
-	DeployService(config model.ServiceConfig) ([]*model.Instance, error)
-	DeleteService(id string) (error)
-	UndeployInstance(instance *model.Instance) (error)
+	ID() string
+	FindServiceInformation(ServiceInformationCriteria) ([]*ServiceInformation, error)
+	UndeployInstance(string) error
+	DeployService(ServiceConfig, int) (*ServiceInformation, error)
 }
 
 type FrameworkType int

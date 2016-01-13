@@ -9,8 +9,8 @@ import (
 	"syscall"
 
 	"github.com/jglobant/yale/cluster"
+	"github.com/jglobant/yale/framework"
 	"github.com/jglobant/yale/monitor"
-	"github.com/jglobant/yale/model"
 	"github.com/jglobant/yale/util"
 	"github.com/codegangsta/cli"
 	"github.com/pivotal-golang/bytefmt"
@@ -151,9 +151,9 @@ func deployCmd(c *cli.Context) {
 		envs = append(envs, v)
 	}
 	
-	serviceConfig := model.ServiceConfig{
-		ServiceId: c.String("service-id"),
-		CpuShares: c.Int("cpu"),
+	serviceConfig := framework.ServiceConfig{
+		ServiceID: c.String("service-id"),
+		CPUShares: c.Int("cpu"),
 		Envs:      envs,
 		ImageName: c.String("image"),
 		Publish:   []string{"8080/tcp"}, // TODO desplegar puertos que no sean 8080
@@ -188,18 +188,15 @@ func deployCmd(c *cli.Context) {
 		var resume []callbackResume
 
 		for k := range instances {
-			if addr := instances[k].Ports[0]; addr == 0  {
-				util.Log.Errorln(err)
-			} else {
-				util.Log.Infof("Se desplegó %s con el tag de registrator %s y dirección %s", instances[k].Id, instances[k].RegistratorId(), addr)
+			for _, val := range instances[k].Ports {
+				util.Log.Infof("Se desplegó %s en host %s y dirección %s", instances[k].ID, instances[k].Host, val)
 				instanceInfo := callbackResume{
-					RegisterId: instances[k].RegistratorId(),
-					Address:    string(addr),
+					RegisterId: instances[k].ID,
+					Address:    string(val.Internal),
 				}
 				resume = append(resume, instanceInfo)
 			}
 		}
-
 		jsonResume, _ := json.Marshal(resume)
 
 		fmt.Println(string(jsonResume))

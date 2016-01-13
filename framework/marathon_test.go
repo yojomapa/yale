@@ -5,16 +5,18 @@ import (
 	"fmt"
 	"time"
 	"errors"
+	"regexp"
 	"io/ioutil"
 	"net/url"
-	"github.com/jglobant/yale/model"
 	"net/http"
 	"net/http/httptest"
 	"github.com/stretchr/testify/assert"
 	"github.com/gambol99/go-marathon"
 )
 var AppMock *marathon.Application
+var AppsMock *marathon.Applications
 var ErrorMock error
+var ErrorAppsMock error
 var CreateAppErrorMock error
 var ListAppErrorMock error
 var ScaleAppErrorMock error
@@ -41,7 +43,9 @@ func (client *MarathonMockClient) ScaleApplicationInstances(name string, instanc
 	return deploymentId, ScaleAppErrorMock
 }
 func (client *MarathonMockClient) RestartApplication(name string, force bool) (*marathon.DeploymentID, error){return nil,nil}
-func (client *MarathonMockClient) Applications(url.Values) (*marathon.Applications, error){return nil,nil}
+func (client *MarathonMockClient) Applications(url.Values) (*marathon.Applications, error){
+	return AppsMock,ErrorAppsMock
+}
 func (client *MarathonMockClient) WaitOnApplication(name string, timeout time.Duration) error {return nil}
 func (client *MarathonMockClient) Tasks(application string) (*marathon.Tasks, error){return nil,nil}
 func (client *MarathonMockClient) AllTasks(opts *marathon.AllTasksOpts) (*marathon.Tasks, error){return nil,nil}
@@ -79,37 +83,61 @@ func TestConstructorError(t *testing.T) {
 }
 
 func TestFindServiceInformation(t *testing.T) {
-	
 	m := createMarathonHelper(t)
 	createBasicMockApp()
-	
-	services, _ := m.FindServiceInformation("nginx")
+	services, _ := m.FindServiceInformation(&ImageNameAndImageTagRegexpCriteria{regexp.MustCompile("sabre-session-pool")})
 	assert.Equal(t, 2, len(services), "Should have found two services")
+        services, _ = m.FindServiceInformation(&ImageNameAndImageTagRegexpCriteria{regexp.MustCompile("sabre-session-pool:v1-3")})
+        assert.Equal(t, 1, len(services), "Should have found one service")
 }
 
-func TestFindServiceInformationError(t *testing.T) {
-
+func TestFindServiceInformationNoResults(t *testing.T) {
         m := createMarathonHelper(t)
-	ErrorMock = errors.New("no app found")
-        _, err := m.FindServiceInformation("nginx")
+        createBasicMockApp()
+        services, err := m.FindServiceInformation(&ImageNameAndImageTagRegexpCriteria{regexp.MustCompile("bla")})
+        assert.Nil(t, services, "Search must return nil")
+	assert.NotNil(t, err, "Should throw error")
+}
+
+func TestFindServiceInformationAppError(t *testing.T) {
+        m := createMarathonHelper(t)
+        createBasicMockApp()
+	AppMock = nil
+	ErrorMock = errors.New("Some app error")
+        services, err := m.FindServiceInformation(&ImageNameAndImageTagRegexpCriteria{regexp.MustCompile("sabre-session-pool")})
+        assert.Nil(t, services, "Search must return nil")
+        assert.NotNil(t, err, "Should throw error")
+}
+
+
+func TestFindServiceInformationError(t *testing.T) {
+        m := createMarathonHelper(t)
+	ErrorAppsMock = errors.New("no app found")
+        _, err := m.FindServiceInformation(&ImageNameAndImageTagRegexpCriteria{regexp.MustCompile("nginx")})
         assert.NotNil(t, err, "Should throw error on recieving application")
 }
 
 func TestFindServiceInformationNil(t *testing.T) {
-
         m := createMarathonHelper(t)
         ErrorMock = nil
 	AppMock = nil
-        service, _ := m.FindServiceInformation("nginx")
+	AppsMock = nil
+	ErrorAppsMock = nil
+        service, _ := m.FindServiceInformation(&ImageNameAndImageTagRegexpCriteria{regexp.MustCompile("nginx")})
         assert.NotNil(t, service, "Should return service")
 	assert.Equal(t, 0, len(service), "instances should be empty")
+}
+
+func TestID(t *testing.T) {
+        m := createMarathonHelper(t)
+        assert.Equal(t, "marathon", m.ID(), "ID should be marathon")
 }
 
 func TestDeployService(t *testing.T) {
 	m := createMarathonHelper(t)
 	createBasicMockApp()
 	
-	instances, err := m.DeployService(model.ServiceConfig{})
+	instances, err := m.DeployService(ServiceConfig{}, 1)
 	assert.Nil(t, err, "Deploy should work")
 	assert.NotNil(t, instances, "Should return new instances")
 }
@@ -117,7 +145,7 @@ func TestDeployService(t *testing.T) {
 func TestErrorDeployService(t *testing.T) {
 	ListAppErrorMock = errors.New("ListApplications throws error")
 	helper := createMarathonHelper(t)
-	_, err := helper.DeployService(model.ServiceConfig{})
+	_, err := helper.DeployService(ServiceConfig{}, 1)
 	assert.NotNil(t, err, "Deploy should throw error")
 }
 
@@ -125,7 +153,7 @@ func TestDeployServiceErrorOnCreate(t *testing.T) {
         m := createMarathonHelper(t)
         createBasicMockApp()
 	CreateAppErrorMock = errors.New("Error on create app")
-        _, err := m.DeployService(model.ServiceConfig{})
+        _, err := m.DeployService(ServiceConfig{}, 1)
         assert.NotNil(t, err, "Deploy should not work")
 }
 
@@ -133,7 +161,7 @@ func TestDeployServiceErrorGetNewApp(t *testing.T) {
         m := createMarathonHelper(t)
         createBasicMockApp()
         ErrorMock = errors.New("Error on create app")
-        _, err := m.DeployService(model.ServiceConfig{})
+        _, err := m.DeployService(ServiceConfig{}, 1)
         assert.NotNil(t, err, "Deploy should not work")
 }
 
@@ -143,7 +171,7 @@ func TestScaleService(t *testing.T) {
 	createBasicMockApp()
 	AppMock.Tasks[0].Version = "version-0"
 	AppMock.Tasks[1].Version = "version-1"
-        instances, err := helper.DeployService(model.ServiceConfig{ServiceId : "nginx", Instances : 2,})
+        instances, err := helper.DeployService(ServiceConfig{ServiceID : "nginx",}, 2)
         assert.Nil(t, err, "Scale should work")
 	assert.NotNil(t, instances, "Scale should return instances")
 }
@@ -152,7 +180,7 @@ func TestScaleServiceError(t *testing.T) {
         ListAppMock = []string{"nginx2","nginx"}
         createBasicMockApp()
 	ScaleAppErrorMock = errors.New("Error on scaling App")
-        _, err := helper.DeployService(model.ServiceConfig{ServiceId : "nginx", Instances : 2,})
+        _, err := helper.DeployService(ServiceConfig{ServiceID : "nginx",}, 2)
 	assert.NotNil(t, err, "Scale should throw error")
 }
 
@@ -161,7 +189,7 @@ func TestScaleServiceErrorGetApp(t *testing.T) {
         ListAppMock = []string{"nginx2","nginx"}
         createBasicMockApp()
 	ErrorMock = errors.New("Error on getting app")
-        _, err := helper.DeployService(model.ServiceConfig{ServiceId : "nginx", Instances : 2,})
+        _, err := helper.DeployService(ServiceConfig{ServiceID : "nginx",}, 2)
         assert.NotNil(t, err, "Scale should throw error")
 }
 
@@ -213,8 +241,7 @@ func TestUndeployInstance(t *testing.T) {
         if error != nil {
                 t.Errorf("Error: " + error.Error())
         }
-	i := model.Instance{}
-        err := m.UndeployInstance(&i)
+        err := m.UndeployInstance("task-id")
         assert.NotNil(t, err, "UndeployInstance should not work")
 }
 
@@ -233,8 +260,33 @@ func createBasicMockApp(){
 	ListAppErrorMock = nil
 	ScaleAppErrorMock = nil
         tasks := make([]*marathon.Task, 2)
+	myPorts := make([]int, 1)
+	myPorts[0] = 32154
         tasks[0] = &marathon.Task{}
+	tasks[0].Ports = myPorts
         tasks[1] = &marathon.Task{}
         AppMock = marathon.NewDockerApplication()
+        dockerPortMappings := make([]*marathon.PortMapping, 1)
+        mapping := &marathon.PortMapping{}
+        mapping.Protocol = "TCP"
+        mapping.ContainerPort = 8080
+	dockerPortMappings[0] = mapping
+        AppMock.Container.Docker.PortMappings = dockerPortMappings
+
         AppMock.Tasks = tasks
+
+        app1 := marathon.Application{}
+        app1.Container = marathon.NewDockerContainer()
+        app1.ID = "/latam/sabre/session/pool/v1/2/trunk-v5"
+        app1.Container.Docker.Image = "sabre-session-pool:v1-2-trunk-v5"
+        app2 := marathon.Application{}
+        app2.Container = marathon.NewDockerContainer()
+        app2.ID = "/latam/sabre/session/pool/v1/3/trunk-v5"
+        app2.Container.Docker.Image = "sabre-session-pool:v1-3-trunk-v5"
+        appSlice := make([]marathon.Application, 2)
+        appSlice[0] = app1
+        appSlice[1] = app2
+        AppsMock = &marathon.Applications{}
+        AppsMock.Apps = appSlice
+	ErrorAppsMock = nil
 }

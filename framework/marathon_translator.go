@@ -2,13 +2,12 @@ package framework
 
 import (
         "github.com/gambol99/go-marathon"
-	"github.com/jglobant/yale/model"
         "strconv"
 	"fmt"
 	"encoding/json"
 )
 
-func translateServiceConfig(config model.ServiceConfig) *marathon.Application {
+func translateServiceConfig(config ServiceConfig, instances int) *marathon.Application {
         application := marathon.NewDockerApplication()
         imageWithTag := config.ImageName + ":" + config.Tag
         labels := map[string]string{
@@ -16,11 +15,11 @@ func translateServiceConfig(config model.ServiceConfig) *marathon.Application {
                 "image_tag":  config.Tag,
         }
 
-        application.Name(config.ServiceId)
+        application.Name(config.ServiceID)
         application.CPU(0.25) // how to map this ?
         //application.Memory(float64(config.Memory))
         application.Memory(64)
-        application.Count(config.Instances)
+        application.Count(instances)
         //application.Env = util.StringSlice2Map(config.Envs)
         application.Labels = labels
 	//application.RequirePorts = true

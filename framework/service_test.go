@@ -1,4 +1,4 @@
-package model
+package framework
 
 import (
 	"testing"
@@ -10,7 +10,7 @@ func TestTagVersionError(t *testing.T) {
                 Tag: "_bla",
         }
 
-	res, err := cfg.TagVersion()
+	res, err := cfg.Version()
 	assert.Equal(t, "", res, "Version should be empty")
 	assert.NotNil(t, err, "Should throw an error")
 }
@@ -20,7 +20,7 @@ func TestTagVersion(t *testing.T) {
                 Tag: "1.2-Service",
         }
 
-        res, _ := cfg.TagVersion()
+        res, _ := cfg.Version()
         assert.Equal(t, "1.2", res, "Version should be 1.2")
 }
 
@@ -29,5 +29,5 @@ func TestString(t *testing.T) {
                 Tag: "bla",
         }
 	res := cfg.String()
-	assert.Contains(t, res, "Tag: bla", "Config should contain Tag: bla")
+	assert.Contains(t, res, "", "Config should contain Tag: bla")
 }
