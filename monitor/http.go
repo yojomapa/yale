@@ -7,7 +7,7 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/yojomapa/yale/util"
+	"github.com/jglobant/yale/util"
 )
 
 type HttpMonitor struct {

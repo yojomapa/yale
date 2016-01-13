@@ -8,10 +8,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/yojomapa/yale/cluster"
-	"github.com/yojomapa/yale/monitor"
-	"github.com/yojomapa/yale/service"
-	"github.com/yojomapa/yale/util"
+	"github.com/jglobant/yale/cluster"
+	"github.com/jglobant/yale/framework"
+	"github.com/jglobant/yale/monitor"
+	"github.com/jglobant/yale/util"
 	"github.com/codegangsta/cli"
 	"github.com/pivotal-golang/bytefmt"
 )
@@ -150,10 +150,10 @@ func deployCmd(c *cli.Context) {
 	for _, v := range c.StringSlice("env") {
 		envs = append(envs, v)
 	}
-
-	serviceConfig := service.ServiceConfig{
-		ServiceId: c.String("service-id"),
-		CpuShares: c.Int("cpu"),
+	
+	serviceConfig := framework.ServiceConfig{
+		ServiceID: c.String("service-id"),
+		CPUShares: c.Int("cpu"),
 		Envs:      envs,
 		ImageName: c.String("image"),
 		Publish:   []string{"8080/tcp"}, // TODO desplegar puertos que no sean 8080
@@ -184,22 +184,19 @@ func deployCmd(c *cli.Context) {
 
 	handleDeploySigTerm(stackManager)
 	if stackManager.Deploy(serviceConfig, smokeConfig, warmUpConfig, c.Int("instances"), c.Float64("tolerance")) {
-		services := stackManager.DeployedContainers()
+		instances := stackManager.DeployedContainers()
 		var resume []callbackResume
 
-		for k := range services {
-			if addr, err := services[k].AddressAndPort(8080); err != nil {
-				util.Log.Errorln(err)
-			} else {
-				util.Log.Infof("Se desplegó %s con el tag de registrator %s y dirección %s", services[k].GetId(), services[k].RegistratorId(), addr)
-				containerInfo := callbackResume{
-					RegisterId: services[k].RegistratorId(),
-					Address:    addr,
+		for k := range instances {
+			for _, val := range instances[k].Ports {
+				util.Log.Infof("Se desplegó %s en host %s y dirección %s", instances[k].ID, instances[k].Host, val)
+				instanceInfo := callbackResume{
+					RegisterId: instances[k].ID,
+					Address:    string(val.Internal),
 				}
-				resume = append(resume, containerInfo)
+				resume = append(resume, instanceInfo)
 			}
 		}
-
 		jsonResume, _ := json.Marshal(resume)
 
 		fmt.Println(string(jsonResume))

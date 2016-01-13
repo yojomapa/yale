@@ -1,10 +1,9 @@
 package cluster
 
 import (
-	"github.com/yojomapa/yale/helper"
-	"github.com/yojomapa/yale/monitor"
-	"github.com/yojomapa/yale/service"
-	"github.com/yojomapa/yale/util"
+	"github.com/jglobant/yale/framework"
+	"github.com/jglobant/yale/monitor"
+	"github.com/jglobant/yale/util"
 )
 
 type StackManager struct {
@@ -39,23 +38,19 @@ func (sm *StackManager) createId() string {
 	}
 }
 
-func (sm *StackManager) AppendStack(dh *helper.DockerHelper) {
+func (sm *StackManager) AppendStack(fh framework.Framework) {
 	key := sm.createId()
 	util.Log.Infof("API configurada y mapeada a la llave %s", key)
-	sm.stacks[key] = NewStack(key, sm.stackNotification, dh)
+	sm.stacks[key] = NewStack(key, sm.stackNotification, fh)
 }
 
-func (sm *StackManager) Deploy(serviceConfig service.ServiceConfig, smokeConfig monitor.MonitorConfig, warmConfig monitor.MonitorConfig, instances int, tolerance float64) bool {
+func (sm *StackManager) Deploy(serviceConfig framework.ServiceConfig, smokeConfig monitor.MonitorConfig, warmConfig monitor.MonitorConfig, instances int, tolerance float64) bool {
+	util.Log.Infoln("enter deploy stack manager %d", len(sm.stacks))
+	
 	for stackKey, _ := range sm.stacks {
-		if err := sm.stacks[stackKey].LoadFilteredContainers(serviceConfig.ImageName, serviceConfig.Tag, ".*"); err != nil {
-			return false
-		}
+		sm.stacks[stackKey].DeployCheckAndNotify(serviceConfig, smokeConfig, warmConfig, instances, tolerance)
 	}
-
-	for stackKey, _ := range sm.stacks {
-		go sm.stacks[stackKey].DeployCheckAndNotify(serviceConfig, smokeConfig, warmConfig, instances, tolerance)
-	}
-
+/*
 	for i := 0; i < len(sm.stacks); i++ {
 		stackStatus := <-sm.stackNotification
 		util.Log.Infoln("Se recibió notificación del Stack con estado", stackStatus)
@@ -64,49 +59,15 @@ func (sm *StackManager) Deploy(serviceConfig service.ServiceConfig, smokeConfig 
 			sm.Rollback()
 			return false
 		}
-	}
+	}*/
 	util.Log.Infoln("Proceso de deploy OK")
 	return true
 }
 
-func (sm *StackManager) DeployedContainers() []*service.DockerService {
-	var containers []*service.DockerService
-
-	for stackKey, _ := range sm.stacks {
-		containers = append(containers, sm.stacks[stackKey].ServicesWithStep(service.STEP_WARM_READY)...)
-	}
+func (sm *StackManager) DeployedContainers() []*framework.Instance {
+	var containers []*framework.Instance
 
 	return containers
-}
-
-func (sm *StackManager) SearchContainers(imageNameFilter string, tagFilter string, containerNameFilter string) (map[string][]*service.DockerService, error) {
-	for stackKey, _ := range sm.stacks {
-		if err := sm.stacks[stackKey].LoadFilteredContainers(imageNameFilter, tagFilter, containerNameFilter); err != nil {
-			return nil, err
-		}
-	}
-
-	containers := make(map[string][]*service.DockerService)
-	for stackKey, _ := range sm.stacks {
-		containers[stackKey] = append(containers[stackKey], sm.stacks[stackKey].services...)
-	}
-
-	return containers, nil
-}
-
-func (sm *StackManager) Tagged(image string, tag string) (map[string][]*service.DockerService, error) {
-	for stackKey, _ := range sm.stacks {
-		if err := sm.stacks[stackKey].LoadTaggedContainers(image, tag); err != nil {
-			return nil, err
-		}
-	}
-
-	containers := make(map[string][]*service.DockerService)
-	for stackKey, _ := range sm.stacks {
-		containers[stackKey] = append(containers[stackKey], sm.stacks[stackKey].services...)
-	}
-
-	return containers, nil
 }
 
 func (sm *StackManager) Rollback() {

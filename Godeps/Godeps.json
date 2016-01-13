@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/ch3lo/yale",
+	"ImportPath": "github.com/jglobant/yale",
 	"GoVersion": "go1.4.2",
 	"Deps": [
 		{
@@ -28,6 +28,11 @@
 		},
 		{
 			"ImportPath": "github.com/docker/docker/pkg/ioutils",
+			"Comment": "v1.4.1-7144-g448398c",
+			"Rev": "448398c2a8a41b6589dd7deb59fdc889e78db223"
+		},
+		{
+			"ImportPath": "github.com/docker/docker/pkg/longpath",
 			"Comment": "v1.4.1-7144-g448398c",
 			"Rev": "448398c2a8a41b6589dd7deb59fdc889e78db223"
 		},

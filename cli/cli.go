@@ -7,10 +7,10 @@ import (
 	"path"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/yojomapa/yale/cluster"
-	"github.com/yojomapa/yale/helper"
-	"github.com/yojomapa/yale/util"
-	"github.com/yojomapa/yale/version"
+	"github.com/jglobant/yale/cluster"
+	"github.com/jglobant/yale/framework"
+	"github.com/jglobant/yale/util"
+	"github.com/jglobant/yale/version"
 	"github.com/codegangsta/cli"
 )
 
@@ -81,9 +81,12 @@ func globalFlags() []cli.Flag {
 		},
 		cli.StringSliceFlag{
 			Name:   "endpoint, ep",
-			Usage:  "Endpoint de la API de Docker",
-			EnvVar: "DOCKER_HOST",
+			Usage:  "Endpoint de la API del Scheduler",
 		},
+                cli.StringFlag{
+                        Name:   "framework",
+                        Usage:  "Scheduler you want to use to orchestrate your containers",
+                },
 		cli.BoolFlag{
 			Name:  "tls",
 			Usage: "Utiliza TLS en la comunicacion con los Endpoints",
@@ -115,12 +118,6 @@ func globalFlags() []cli.Flag {
 			Value:  "key.pem",
 			Usage:  "Ruta relativa del arhivo con la llave del certificado cliente",
 			EnvVar: "DEPLOYER_CERT_KEY",
-		},
-		cli.StringFlag{
-			Name:   "auth-file",
-			Value:  dockerCfgPath(),
-			Usage:  "Archivo de configuracion de la autenticacion",
-			EnvVar: "DEPLOYER_AUTH_CONFIG",
 		},
 		cli.StringFlag{
 			Name:   "log-level",
@@ -176,29 +173,38 @@ func setupGlobalFlags(c *cli.Context) error {
 		return err
 	}
 
+	frameworkType := c.String("framework")
+	if (frameworkType == "" || framework.GetFrameworkType(frameworkType) == framework.NOT_VALID){
+		return errors.New("Invalid type of scheduler")
+	}
+
 	stackManager = cluster.NewStackManager()
 
 	for _, ep := range c.StringSlice("endpoint") {
 		util.Log.Infof("Configurando el endpoint de Docker %s", ep)
-		var dh *helper.DockerHelper
+		var fh framework.Framework
+		fCfg := framework.FrameworkConfig {
+			Type : framework.MARATHON,
+			EndpointUrl : ep,
+		}
 		if c.Bool("tlsverify") {
-			ca := buildCertPath(c.String("cert_path"), c.String("tlscacert"))
-			cert := buildCertPath(c.String("cert_path"), c.String("tlscert"))
-			key := buildCertPath(c.String("cert_path"), c.String("tlskey"))
-			dh, err = helper.NewDockerTlsVerifyHelper(ep, c.String("auth-file"), cert, key, ca)
+			fCfg.Ca = buildCertPath(c.String("cert_path"), c.String("tlscacert"))
+			fCfg.Cert = buildCertPath(c.String("cert_path"), c.String("tlscert"))
+			fCfg.Key = buildCertPath(c.String("cert_path"), c.String("tlskey"))
+			fh, err = framework.NewFrameworkTlsVerifyHelper(fCfg)
 		} else if c.Bool("tls") {
-			cert := buildCertPath(c.String("cert_path"), c.String("tlscert"))
-			key := buildCertPath(c.String("cert_path"), c.String("tlskey"))
-			dh, err = helper.NewDockerTlsHelper(ep, c.String("auth-file"), cert, key)
+			fCfg.Cert = buildCertPath(c.String("cert_path"), c.String("tlscert"))
+			fCfg.Key = buildCertPath(c.String("cert_path"), c.String("tlskey"))
+			fh, err = framework.NewFrameworkTlsHelper(fCfg)
 		} else {
-			dh, err = helper.NewDockerHelper(ep, c.String("auth-file"))
+			fh, err = framework.NewFramework(fCfg)
 		}
 
 		if err != nil {
-			fmt.Println("No se pudo configurar el endpoint de Docker")
+			fmt.Println("No se pudo configurar el endpoint del Framework")
 			return err
 		}
-		stackManager.AppendStack(dh)
+		stackManager.AppendStack(fh)
 	}
 
 	return nil
@@ -207,8 +213,8 @@ func setupGlobalFlags(c *cli.Context) error {
 func RunApp() {
 
 	app := cli.NewApp()
-	app.Name = "yale"
-	app.Usage = "Despliegue de App Docker con esteroides"
+	app.Name = "cloud-crane"
+	app.Usage = "Multi-Scheduler Orchestrator"
 	app.Version = version.VERSION + " (" + version.GITCOMMIT + ")"
 
 	app.Flags = globalFlags()
@@ -220,7 +226,7 @@ func RunApp() {
 	app.Commands = commands
 
 	var err error
-	logFile, err = os.OpenFile("yale.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	logFile, err = os.OpenFile("cloud-crane.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		util.Log.Warnln("Error al abrir el archivo")
 	} else {
