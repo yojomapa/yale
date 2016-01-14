@@ -7,10 +7,10 @@ import (
 	"path"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/jglobant/yale/cluster"
-	"github.com/jglobant/yale/framework"
-	"github.com/jglobant/yale/util"
-	"github.com/jglobant/yale/version"
+	"github.com/yojomapa/yale/cluster"
+	"github.com/yojomapa/yale/framework"
+	"github.com/yojomapa/yale/util"
+	"github.com/yojomapa/yale/version"
 	"github.com/codegangsta/cli"
 )
 
@@ -80,13 +80,13 @@ func globalFlags() []cli.Flag {
 			Usage: "Modo de verbosidad debug",
 		},
 		cli.StringSliceFlag{
-			Name:   "endpoint, ep",
-			Usage:  "Endpoint de la API del Scheduler",
+			Name:  "endpoint, ep",
+			Usage: "Endpoint de la API del Scheduler",
 		},
-                cli.StringFlag{
-                        Name:   "framework",
-                        Usage:  "Scheduler you want to use to orchestrate your containers",
-                },
+		cli.StringFlag{
+			Name:  "framework",
+			Usage: "Scheduler you want to use to orchestrate your containers",
+		},
 		cli.BoolFlag{
 			Name:  "tls",
 			Usage: "Utiliza TLS en la comunicacion con los Endpoints",
@@ -174,7 +174,7 @@ func setupGlobalFlags(c *cli.Context) error {
 	}
 
 	frameworkType := c.String("framework")
-	if (frameworkType == "" || framework.GetFrameworkType(frameworkType) == framework.NOT_VALID){
+	if frameworkType == "" || framework.GetFrameworkType(frameworkType) == framework.NOT_VALID {
 		return errors.New("Invalid type of scheduler")
 	}
 
@@ -183,9 +183,9 @@ func setupGlobalFlags(c *cli.Context) error {
 	for _, ep := range c.StringSlice("endpoint") {
 		util.Log.Infof("Configurando el endpoint de Docker %s", ep)
 		var fh framework.Framework
-		fCfg := framework.FrameworkConfig {
-			Type : framework.MARATHON,
-			EndpointUrl : ep,
+		fCfg := framework.FrameworkConfig{
+			Type:        framework.MARATHON,
+			EndpointUrl: ep,
 		}
 		if c.Bool("tlsverify") {
 			fCfg.Ca = buildCertPath(c.String("cert_path"), c.String("tlscacert"))

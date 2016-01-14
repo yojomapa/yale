@@ -8,10 +8,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/jglobant/yale/cluster"
-	"github.com/jglobant/yale/framework"
-	"github.com/jglobant/yale/monitor"
-	"github.com/jglobant/yale/util"
+	"github.com/yojomapa/yale/cluster"
+	"github.com/yojomapa/yale/framework"
+	"github.com/yojomapa/yale/monitor"
+	"github.com/yojomapa/yale/util"
 	"github.com/codegangsta/cli"
 	"github.com/pivotal-golang/bytefmt"
 )
@@ -150,7 +150,7 @@ func deployCmd(c *cli.Context) {
 	for _, v := range c.StringSlice("env") {
 		envs = append(envs, v)
 	}
-	
+
 	serviceConfig := framework.ServiceConfig{
 		ServiceID: c.String("service-id"),
 		CPUShares: c.Int("cpu"),
