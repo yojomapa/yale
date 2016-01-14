@@ -6,7 +6,6 @@ import (
 	"github.com/jglobant/yale/util"
 	"github.com/gambol99/go-marathon"
 	"strings"
-	"fmt"
 )
 
 const frameworkID = "marathon"
@@ -162,8 +161,6 @@ func (helper *Marathon) buildInstancePorts(dockerPortMappings []*marathon.PortMa
 	if dockerPortMappings == nil || len(dockerPortMappings) == 0 || taskPorts == nil || len(taskPorts) == 0 {
 		return nil
 	}
-	fmt.Println("task ports len", len(taskPorts))
-	fmt.Println("docker port len", dockerPortMappings)
 
 	ports := make(map[string]InstancePort, len(taskPorts))
 

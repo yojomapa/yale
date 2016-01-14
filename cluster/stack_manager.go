@@ -63,10 +63,30 @@ func (sm *StackManager) Deploy(serviceConfig framework.ServiceConfig, instances 
 	return true
 }
 
-func (sm *StackManager) DeployedContainers() []*framework.Instance {
-	var containers []*framework.Instance
+func (sm *StackManager) FindServiceInformation(search string) []*framework.ServiceInformation {
+	allServices := make([]*framework.ServiceInformation, 0)
+        for stack, _ := range sm.stacks {
+                services, err := sm.stacks[stack].FindServiceInformation(search)
+		if err != nil {
+			util.Log.Errorln(err)
+		}
+		if services != nil || len(services) != 0 {
+			allServices = append(allServices, services...)
+		}
+        }
+	return allServices
+}
 
-	return containers
+func (sm *StackManager) DeployedContainers () []*framework.ServiceInformation {
+        allServices := make([]*framework.ServiceInformation, 0)
+        for stack, _ := range sm.stacks {
+                services := sm.stacks[stack].getServices()
+                if services != nil || len(services) != 0 {
+                        allServices = append(allServices, services...)
+                }
+        }
+        return allServices
+	
 }
 
 func (sm *StackManager) Rollback() {

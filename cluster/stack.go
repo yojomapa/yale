@@ -6,6 +6,7 @@ import (
 	"github.com/jglobant/yale/framework"
 	"github.com/jglobant/yale/util"
 	"fmt"
+	"regexp"
 )
 
 type StackStatus int
@@ -27,7 +28,7 @@ func (s StackStatus) String() string {
 type Stack struct {
 	id                    string
 	frameworkApiHelper    framework.Framework
-	instances             []*framework.ServiceInformation
+	services              []*framework.ServiceInformation
 	serviceIdNotification chan string
 	stackNofitication     chan<- StackStatus
 	log                   *log.Entry
@@ -47,12 +48,16 @@ func NewStack(stackKey string, stackNofitication chan<- StackStatus, fh framewor
 	return s
 }
 
+func (s *Stack) getServices() []*framework.ServiceInformation {
+	return s.services
+}
+
 func (s *Stack) createId() string {
 	for {
 		key := s.id + "_" + randomdata.Adjective()
 		exist := false
 
-		for _, srv := range s.instances {
+		for _, srv := range s.services {
 			if srv.ID == key {
 				exist = true
 			}
@@ -82,20 +87,13 @@ func (s *Stack) undeployInstance(instance string) {
 
 func (s *Stack) Rollback() {
 	s.log.Infof("Comenzando Rollback en el Stack")
-	for _, srv := range s.instances {
-		//if !srv.IsLoaded() {
-		s.undeployInstance(srv.ID)
-		//}
-	}
 }
 
-func (s *Stack) UndeployInstances(total int) {
-	undeployed := 0
-	for _, srv := range s.instances {
-		if undeployed == total {
-			return
-		}
-		s.undeployInstance(srv.ID)
-		undeployed++
+func (s *Stack) FindServiceInformation(search string) ([]*framework.ServiceInformation, error) {
+	services , err := s.frameworkApiHelper.FindServiceInformation(&framework.ImageNameAndImageTagRegexpCriteria{regexp.MustCompile(search)})
+	if err != nil {
+		return nil , err
 	}
+	s.services = services
+	return s.services, nil
 }
