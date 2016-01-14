@@ -17,8 +17,7 @@ func translateServiceConfig(config ServiceConfig, instances int) *marathon.Appli
 
         application.Name(config.ServiceID)
         application.CPU(0.25) // how to map this ?
-        //application.Memory(float64(config.Memory))
-        application.Memory(64)
+        application.Memory(float64(config.Memory))
         application.Count(instances)
         //application.Env = util.StringSlice2Map(config.Envs)
         application.Labels = labels

@@ -7,13 +7,13 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"strconv"
 
 	"github.com/jglobant/yale/cluster"
 	"github.com/jglobant/yale/framework"
 	"github.com/jglobant/yale/monitor"
 	"github.com/jglobant/yale/util"
 	"github.com/codegangsta/cli"
-	"github.com/pivotal-golang/bytefmt"
 )
 
 func handleDeploySigTerm(sm *cluster.StackManager) {
@@ -118,12 +118,11 @@ func deployBefore(c *cli.Context) error {
 	if c.String("smoke-request") == "" {
 		return errors.New("El endpoint de Smoke Test esta vacio")
 	}
-
+	
 	if c.String("memory") != "" {
-		if _, err := bytefmt.ToMegabytes(c.String("memory")); err != nil {
+		if _, err := strconv.ParseInt(c.String("memory"), 10, 64); err != nil {
 			return errors.New("Valor del parámetro memory invalido")
 		}
-
 	}
 
 	for _, file := range c.StringSlice("env-file") {
@@ -161,9 +160,8 @@ func deployCmd(c *cli.Context) {
 	}
 
 	if c.String("memory") != "" {
-		megabytes, _ := bytefmt.ToMegabytes(c.String("memory"))
-		memory := megabytes * 1024 * 1024
-		serviceConfig.Memory = int64(memory)
+		n, _ := strconv.ParseInt(c.String("memory"), 10, 64)
+		serviceConfig.Memory = int64(n)
 	}
 
 	smokeConfig := monitor.MonitorConfig{
