@@ -1,7 +1,7 @@
 package cluster
 
 import (
-	"github.com/yojomapa/yale/framework"
+	"github.com/jglobant/yale/framework"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"reflect"

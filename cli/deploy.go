@@ -9,9 +9,9 @@ import (
 	"syscall"
 	"strconv"
 
-	"github.com/yojomapa/yale/cluster"
-	"github.com/yojomapa/yale/framework"
-	"github.com/yojomapa/yale/util"
+	"github.com/jglobant/yale/cluster"
+	"github.com/jglobant/yale/framework"
+	"github.com/jglobant/yale/util"
 	"github.com/codegangsta/cli"
 )
 
@@ -135,17 +135,18 @@ func deployCmd(c *cli.Context) {
 
 	handleDeploySigTerm(stackManager)
 	if stackManager.Deploy(serviceConfig, c.Int("instances"), c.Float64("tolerance")) {
-		instances := stackManager.DeployedContainers()
+		services := stackManager.DeployedContainers()
 		var resume []callbackResume
-
-		for k := range instances {
-			for _, val := range instances[k].Ports {
-				util.Log.Infof("Se desplegó %s en host %s y dirección %s", instances[k].ID, instances[k].Host, val)
-				instanceInfo := callbackResume{
-					RegisterId: instances[k].ID,
-					Address:    string(val.Internal),
+		for _, service := range services {
+			for _, instance := range service.Instances {
+				for _, val := range instance.Ports {
+					util.Log.Infof("Se desplegó %s en host %s y dirección %s", instance.ID, instance.Host, val)
+					instanceInfo := callbackResume{
+						RegisterId: instance.ID,
+						Address:    string(val.Internal),
+					}
+					resume = append(resume, instanceInfo)
 				}
-				resume = append(resume, instanceInfo)
 			}
 		}
 		jsonResume, _ := json.Marshal(resume)
