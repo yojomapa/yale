@@ -11,7 +11,6 @@ import (
 
 	"github.com/yojomapa/yale/cluster"
 	"github.com/yojomapa/yale/framework"
-	"github.com/yojomapa/yale/monitor"
 	"github.com/yojomapa/yale/util"
 	"github.com/codegangsta/cli"
 )
@@ -75,34 +74,6 @@ func deployFlags() []cli.Flag {
 				"Este valor es respecto al total de instancias." +
 				"Por ejemplo, si se despliegan 5 servicios y fallan ",
 		},
-		cli.IntFlag{
-			Name:  "smoke-retries",
-			Value: 10,
-			Usage: "Cantidad de smoke test que se realizarán antes de declarar el servicio con fallo de despliegue",
-		},
-		cli.StringFlag{
-			Name:  "smoke-type",
-			Value: "http",
-			Usage: "Define si el smoke test es TCP o HTTP",
-		},
-		cli.StringFlag{
-			Name:  "smoke-request",
-			Usage: "Información necesaria para el request",
-		},
-		cli.StringFlag{
-			Name:  "smoke-expected",
-			Value: ".*",
-			Usage: "Valor esperado en el smoke test para definir la prueba como exitosa. Es una expresión regular.",
-		},
-		cli.StringFlag{
-			Name:  "warmup-request",
-			Usage: "Enpoint que se utilizará para hacer el calentamiento del servicio",
-		},
-		cli.StringFlag{
-			Name:  "warmup-expected",
-			Value: ".*",
-			Usage: "Valor esperado del resultado del calentamiento. Si se cumple el valor pasado, se asume un calentamiento exitoso",
-		},
 	}
 }
 
@@ -113,10 +84,6 @@ func deployBefore(c *cli.Context) error {
 
 	if c.String("tag") == "" {
 		return errors.New("El TAG de la imagen esta vacio")
-	}
-
-	if c.String("smoke-request") == "" {
-		return errors.New("El endpoint de Smoke Test esta vacio")
 	}
 	
 	if c.String("memory") != "" {
@@ -164,24 +131,10 @@ func deployCmd(c *cli.Context) {
 		serviceConfig.Memory = int64(n)
 	}
 
-	smokeConfig := monitor.MonitorConfig{
-		Retries:  c.Int("smoke-retries"),
-		Type:     monitor.GetMonitor(c.String("smoke-type")),
-		Request:  c.String("smoke-request"),
-		Expected: c.String("smoke-expected"),
-	}
-
-	warmUpConfig := monitor.MonitorConfig{
-		Retries:  1,
-		Type:     monitor.HTTP,
-		Request:  c.String("warmup-request"),
-		Expected: c.String("warmup-expected"),
-	}
-
 	util.Log.Debugf("La configuración del servicio es: %#v", serviceConfig.String())
 
 	handleDeploySigTerm(stackManager)
-	if stackManager.Deploy(serviceConfig, smokeConfig, warmUpConfig, c.Int("instances"), c.Float64("tolerance")) {
+	if stackManager.Deploy(serviceConfig, c.Int("instances"), c.Float64("tolerance")) {
 		instances := stackManager.DeployedContainers()
 		var resume []callbackResume
 
