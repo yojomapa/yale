@@ -1,9 +1,8 @@
 package cluster
 
 import (
-	"github.com/jglobant/yale/framework"
-	"github.com/jglobant/yale/monitor"
-	"github.com/jglobant/yale/util"
+	"github.com/yojomapa/yale/framework"
+	"github.com/yojomapa/yale/util"
 )
 
 type StackManager struct {
@@ -44,22 +43,22 @@ func (sm *StackManager) AppendStack(fh framework.Framework) {
 	sm.stacks[key] = NewStack(key, sm.stackNotification, fh)
 }
 
-func (sm *StackManager) Deploy(serviceConfig framework.ServiceConfig, smokeConfig monitor.MonitorConfig, warmConfig monitor.MonitorConfig, instances int, tolerance float64) bool {
+func (sm *StackManager) Deploy(serviceConfig framework.ServiceConfig, instances int, tolerance float64) bool {
 	util.Log.Infoln("enter deploy stack manager %d", len(sm.stacks))
-	
+
 	for stackKey, _ := range sm.stacks {
-		sm.stacks[stackKey].DeployCheckAndNotify(serviceConfig, smokeConfig, warmConfig, instances, tolerance)
+		sm.stacks[stackKey].DeployCheckAndNotify(serviceConfig, instances, tolerance)
 	}
-/*
-	for i := 0; i < len(sm.stacks); i++ {
-		stackStatus := <-sm.stackNotification
-		util.Log.Infoln("Se recibió notificación del Stack con estado", stackStatus)
-		if stackStatus == STACK_FAILED {
-			util.Log.Errorln("Fallo el stack, se procederá a realizar Rollback")
-			sm.Rollback()
-			return false
-		}
-	}*/
+	/*
+		for i := 0; i < len(sm.stacks); i++ {
+			stackStatus := <-sm.stackNotification
+			util.Log.Infoln("Se recibió notificación del Stack con estado", stackStatus)
+			if stackStatus == STACK_FAILED {
+				util.Log.Errorln("Fallo el stack, se procederá a realizar Rollback")
+				sm.Rollback()
+				return false
+			}
+		}*/
 	util.Log.Infoln("Proceso de deploy OK")
 	return true
 }

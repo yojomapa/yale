@@ -20,8 +20,7 @@ func TestCliCmdDeploy(t *testing.T) {
         }))
         defer ts.Close()
 
-	os.Args = append(os.Args, "--framework=Marathon", "--endpoint="+ts.URL, "deploy", "--image=nginx", "--tag=latest", "--smoke-request=bla")
-	//os.Args = append(os.Args, "--smoke-request=/smoke")
+	os.Args = append(os.Args, "--framework=Marathon", "--endpoint="+ts.URL, "deploy", "--image=nginx", "--tag=latest")
 	RunApp()
 	v := reflect.ValueOf(stackManager).Elem()
 	stacks := v.FieldByName("stacks")
@@ -29,7 +28,7 @@ func TestCliCmdDeploy(t *testing.T) {
 }
 
 func TestInvalidFramework(t *testing.T) {
-        os.Args = append(os.Args, "--framework=bla", "--endpoint=url", "deploy", "--image=nginx", "--tag=latest", "--smoke-request=bla")
+        os.Args = append(os.Args, "--framework=bla", "--endpoint=url", "deploy", "--image=nginx", "--tag=latest")
 	if os.Getenv("BE_CRASHER") == "1" {
 		RunApp()
 		return

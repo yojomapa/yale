@@ -3,9 +3,8 @@ package cluster
 import (
 	"github.com/Pallinder/go-randomdata"
 	log "github.com/Sirupsen/logrus"
-	"github.com/jglobant/yale/framework"
-	"github.com/jglobant/yale/monitor"
-	"github.com/jglobant/yale/util"
+	"github.com/yojomapa/yale/framework"
+	"github.com/yojomapa/yale/util"
 	"fmt"
 )
 
@@ -31,8 +30,6 @@ type Stack struct {
 	instances             []*framework.ServiceInformation
 	serviceIdNotification chan string
 	stackNofitication     chan<- StackStatus
-	smokeTestMonitor      monitor.Monitor
-	warmUpMonitor         monitor.Monitor
 	log                   *log.Entry
 }
 
@@ -67,24 +64,8 @@ func (s *Stack) createId() string {
 	}
 }
 
-func (s *Stack) createMonitor(config monitor.MonitorConfig) monitor.Monitor {
-	var mon monitor.Monitor
 
-	s.log.Infof("Creando monitor con mode [%s] y request [%s]", config.Type, config.Request)
-	if config.Type == monitor.TCP {
-		mon = new(monitor.TcpMonitor)
-	} else {
-		mon = new(monitor.HttpMonitor)
-	}
-
-	mon.SetRetries(config.Retries)
-	mon.SetRequest(config.Request)
-	mon.SetExpected(config.Expected)
-
-	return mon
-}
-
-func (s *Stack) DeployCheckAndNotify(serviceConfig framework.ServiceConfig, smokeConfig monitor.MonitorConfig, warmConfig monitor.MonitorConfig, instances int, tolerance float64) {
+func (s *Stack) DeployCheckAndNotify(serviceConfig framework.ServiceConfig, instances int, tolerance float64) {
 	_, err := s.frameworkApiHelper.DeployService(serviceConfig, instances)
 	if err != nil {
 		fmt.Println(err)
@@ -103,7 +84,7 @@ func (s *Stack) Rollback() {
 	s.log.Infof("Comenzando Rollback en el Stack")
 	for _, srv := range s.instances {
 		//if !srv.IsLoaded() {
-			s.undeployInstance(srv.ID)
+		s.undeployInstance(srv.ID)
 		//}
 	}
 }
