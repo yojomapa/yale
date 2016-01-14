@@ -3,7 +3,7 @@ package framework
 import (
 	"errors"
 	"time"
-	"github.com/yojomapa/yale/util"
+	"github.com/jglobant/yale/util"
 	"github.com/gambol99/go-marathon"
 	"strings"
 	"fmt"

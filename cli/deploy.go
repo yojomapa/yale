@@ -9,9 +9,9 @@ import (
 	"syscall"
 	"strconv"
 
-	"github.com/yojomapa/yale/cluster"
-	"github.com/yojomapa/yale/framework"
-	"github.com/yojomapa/yale/util"
+	"github.com/jglobant/yale/cluster"
+	"github.com/jglobant/yale/framework"
+	"github.com/jglobant/yale/util"
 	"github.com/codegangsta/cli"
 )
 

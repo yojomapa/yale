@@ -3,8 +3,8 @@ package cluster
 import (
 	"github.com/Pallinder/go-randomdata"
 	log "github.com/Sirupsen/logrus"
-	"github.com/yojomapa/yale/framework"
-	"github.com/yojomapa/yale/util"
+	"github.com/jglobant/yale/framework"
+	"github.com/jglobant/yale/util"
 	"fmt"
 )
 

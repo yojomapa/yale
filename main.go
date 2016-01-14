@@ -1,6 +1,6 @@
 package main
 
-import "github.com/yojomapa/yale/cli"
+import "github.com/jglobant/yale/cli"
 
 func main() {
 	cli.RunApp()

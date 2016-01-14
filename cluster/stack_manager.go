@@ -1,8 +1,8 @@
 package cluster
 
 import (
-	"github.com/yojomapa/yale/framework"
-	"github.com/yojomapa/yale/util"
+	"github.com/jglobant/yale/framework"
+	"github.com/jglobant/yale/util"
 )
 
 type StackManager struct {
